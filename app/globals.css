@@ -114,5 +114,8 @@ html, body {
 /* Section paddings — tighter */
 .section-pad { padding-top: clamp(2.5rem, 5vw, 4.5rem); padding-bottom: clamp(2.5rem, 5vw, 4.5rem); }
 
+/* Anchor scroll offset so sticky nav never covers section headers */
+section[id] { scroll-margin-top: 96px; }
+
 /* Selection */
 ::selection { background: var(--gold); color: var(--navy); }

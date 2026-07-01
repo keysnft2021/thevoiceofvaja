@@ -121,7 +121,7 @@ function WelcomeScreen({ onEnter, welcome }) {
               bg="https://images.pexels.com/photos/7901950/pexels-photo-7901950.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940" />
           </motion.div>
           <motion.button initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 2.6 }}
-            onClick={() => onEnter('home')} className="mt-10 text-beige/70 hover:text-gold text-xs tracking-[0.3em] uppercase link-sweep">
+            onClick={() => onEnter('home')} className="mt-10 text-gold hover:text-[color:var(--gold-soft)] text-xs tracking-[0.3em] uppercase link-sweep">
             or enter the full experience →
           </motion.button>
         </div>
@@ -135,9 +135,9 @@ function ExploreCard({ onClick, icon: Icon, title, items, bg }) {
   return (
     <motion.button whileHover={{ y: -8 }} whileTap={{ scale: 0.98 }} onClick={onClick}
       className="group relative overflow-hidden rounded-2xl border border-gold/30 bg-navy-soft/50 backdrop-blur text-left p-6 md:p-8 h-[260px] md:h-[300px] flex flex-col justify-between">
-      <div className="absolute inset-0 opacity-40 group-hover:opacity-60 transition-opacity duration-700">
+      <div className="absolute inset-0 opacity-60 group-hover:opacity-70 transition-opacity duration-700">
         <img src={bg} alt="" className="w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-br from-navy/90 via-navy/70 to-navy/50" />
+        <div className="absolute inset-0 bg-gradient-to-br from-navy/95 via-navy/85 to-navy/70" />
       </div>
       <div className="relative z-10 flex items-center justify-between">
         <div className="w-12 h-12 rounded-full border border-gold/60 flex items-center justify-center text-gold"><Icon className="w-5 h-5" /></div>
@@ -755,40 +755,95 @@ function ContactRow({ icon: Icon, label, value, href }) {
 // ------------- FOOTER -------------
 function Footer({ contact }) {
   return (
-    <footer className="bg-navy text-beige/70 pt-16 pb-8">
-      <div className="mx-auto max-w-7xl px-6 grid md:grid-cols-4 gap-10">
-        <div className="md:col-span-2">
+    <footer className="bg-navy text-white/70">
+      {/* Top CTA band */}
+      <div className="border-b border-white/10">
+        <div className="mx-auto max-w-7xl px-6 py-10 grid md:grid-cols-2 gap-6 items-center">
+          <div>
+            <div className="text-xs tracking-[0.35em] uppercase text-gold mb-2">Ready to book?</div>
+            <h3 className="font-serif text-3xl md:text-4xl text-white leading-tight">Bring the voice of Vaja to your <span className="italic text-gold-grad">next stage</span>.</h3>
+          </div>
+          <div className="flex md:justify-end gap-3 flex-wrap">
+            <a href="#book" className="inline-flex items-center gap-2 rounded-full bg-gold text-navy px-6 py-3 text-sm font-medium hover:opacity-90"><Sparkles className="w-4 h-4" /> Book Vaja</a>
+            <a href={`mailto:${contact.email}`} className="inline-flex items-center gap-2 rounded-full border border-white/25 text-white px-6 py-3 text-sm hover:border-gold"><Mail className="w-4 h-4" /> Email us</a>
+          </div>
+        </div>
+      </div>
+
+      <div className="mx-auto max-w-7xl px-6 py-14 grid md:grid-cols-12 gap-10">
+        <div className="md:col-span-5">
           <div className="flex items-center gap-3">
-            <span className="w-10 h-10 rounded-full bg-gold text-navy flex items-center justify-center font-serif text-xl">V</span>
+            <span className="w-11 h-11 rounded-full bg-gold text-navy flex items-center justify-center font-serif text-xl">V</span>
             <div>
-              <div className="font-serif text-ivory text-xl">The Voice Of Vaja</div>
+              <div className="font-serif text-white text-xl">The Voice Of Vaja</div>
               <div className="text-[10px] tracking-widest uppercase text-gold">Music • Voice • Live</div>
             </div>
           </div>
-          <p className="mt-5 max-w-sm text-sm">Music that connects. Voices that inspire. Multilingual originals, playback and voice engagements for the world’s most discerning stages, studios and screens.</p>
+          <p className="mt-5 max-w-sm text-sm leading-relaxed text-white/70">
+            Music that connects. Voices that inspire. Multilingual originals, playback and voice
+            engagements for the world’s most discerning stages, studios and screens.
+          </p>
+          <div className="mt-6 flex flex-wrap gap-2">
+            {['Tamil', 'English', 'Hindi', 'Telugu', 'Malayalam'].map((l) => (
+              <span key={l} className="text-[10px] tracking-widest uppercase text-white/60 bg-white/5 border border-white/10 rounded-full px-2.5 py-1">{l}</span>
+            ))}
+          </div>
+          <div className="mt-6 flex items-center gap-3">
+            <a href={contact.instagramUrl} target="_blank" rel="noreferrer" aria-label="Instagram"
+               className="w-10 h-10 rounded-full border border-white/15 flex items-center justify-center hover:border-gold hover:text-gold text-white/70"><Instagram className="w-4 h-4" /></a>
+            {contact.youtubeUrl ? <a href={contact.youtubeUrl} target="_blank" rel="noreferrer" aria-label="YouTube"
+               className="w-10 h-10 rounded-full border border-white/15 flex items-center justify-center hover:border-gold hover:text-gold text-white/70"><Youtube className="w-4 h-4" /></a> : null}
+            {contact.spotifyUrl ? <a href={contact.spotifyUrl} target="_blank" rel="noreferrer" aria-label="Spotify"
+               className="w-10 h-10 rounded-full border border-white/15 flex items-center justify-center hover:border-gold hover:text-gold text-white/70"><Music2 className="w-4 h-4" /></a> : null}
+            <a href={`tel:${(contact.phone||'').replace(/\s/g,'')}`} aria-label="Phone"
+               className="w-10 h-10 rounded-full border border-white/15 flex items-center justify-center hover:border-gold hover:text-gold text-white/70"><Phone className="w-4 h-4" /></a>
+          </div>
         </div>
-        <div>
-          <div className="text-xs tracking-[0.3em] uppercase text-gold mb-4">Explore</div>
-          <ul className="space-y-2 text-sm">
-            {NAV_LINKS.slice(1, 6).map((l) => (<li key={l.id}><a href={`#${l.id}`} className="hover:text-ivory link-sweep">{l.label}</a></li>))}
+
+        <div className="md:col-span-2">
+          <div className="text-xs tracking-[0.3em] uppercase text-gold mb-4">Sitemap</div>
+          <ul className="space-y-2 text-sm text-white/75">
+            <li><a href="#home" className="hover:text-white link-sweep">Home</a></li>
+            <li><a href="#about" className="hover:text-white link-sweep">About</a></li>
+            <li><a href="#music" className="hover:text-white link-sweep">Music</a></li>
+            <li><a href="#voice" className="hover:text-white link-sweep">Voice & Dubbing</a></li>
+            <li><a href="#gallery" className="hover:text-white link-sweep">Gallery</a></li>
+            <li><a href="#collabs" className="hover:text-white link-sweep">Collaborations</a></li>
           </ul>
         </div>
-        <div>
+
+        <div className="md:col-span-2">
+          <div className="text-xs tracking-[0.3em] uppercase text-gold mb-4">Engage</div>
+          <ul className="space-y-2 text-sm text-white/75">
+            <li><a href="#testimonials" className="hover:text-white link-sweep">Testimonials</a></li>
+            <li><a href="#book" className="hover:text-white link-sweep">Book Vaja</a></li>
+            <li><a href="#contact" className="hover:text-white link-sweep">Contact</a></li>
+            <li><a href="/sitemap.xml" className="hover:text-white link-sweep">Sitemap.xml</a></li>
+            <li><a href="/admin" className="hover:text-white link-sweep">Admin</a></li>
+          </ul>
+        </div>
+
+        <div className="md:col-span-3">
           <div className="text-xs tracking-[0.3em] uppercase text-gold mb-4">Reach Out</div>
-          <ul className="space-y-2 text-sm">
-            <li>{contact.phone}</li>
-            <li>{contact.email}</li>
-            <li><a href={contact.instagramUrl} target="_blank" rel="noreferrer" className="hover:text-ivory link-sweep">@{contact.instagram}</a></li>
-            <li>{contact.location}</li>
+          <ul className="space-y-3 text-sm text-white/85">
+            <li className="flex items-start gap-3"><Phone className="w-4 h-4 mt-0.5 text-gold shrink-0" /><a href={`tel:${(contact.phone||'').replace(/\s/g,'')}`} className="hover:text-white">{contact.phone}</a></li>
+            <li className="flex items-start gap-3"><Mail className="w-4 h-4 mt-0.5 text-gold shrink-0" /><a href={`mailto:${contact.email}`} className="hover:text-white break-all">{contact.email}</a></li>
+            <li className="flex items-start gap-3"><Instagram className="w-4 h-4 mt-0.5 text-gold shrink-0" /><a href={contact.instagramUrl} target="_blank" rel="noreferrer" className="hover:text-white">@{contact.instagram}</a></li>
+            <li className="flex items-start gap-3"><MapPin className="w-4 h-4 mt-0.5 text-gold shrink-0" /><span>{contact.location}</span></li>
           </ul>
         </div>
       </div>
-      <div className="mt-14 border-t border-ivory/10 pt-6 mx-auto max-w-7xl px-6 flex flex-col md:flex-row items-center justify-between gap-3 text-xs">
-        <div>© {new Date().getFullYear()} The Voice Of Vaja. All rights reserved. <a href="/admin" className="hover:text-ivory ml-3 opacity-60">Admin</a></div>
-        <div className="flex items-center gap-4">
-          <a href={contact.instagramUrl} target="_blank" rel="noreferrer" className="hover:text-ivory"><Instagram className="w-4 h-4" /></a>
-          {contact.youtubeUrl ? <a href={contact.youtubeUrl} target="_blank" rel="noreferrer" className="hover:text-ivory"><Youtube className="w-4 h-4" /></a> : null}
-          {contact.spotifyUrl ? <a href={contact.spotifyUrl} target="_blank" rel="noreferrer" className="hover:text-ivory"><Music2 className="w-4 h-4" /></a> : null}
+
+      <div className="border-t border-white/10">
+        <div className="mx-auto max-w-7xl px-6 py-5 flex flex-col md:flex-row items-center justify-between gap-3 text-xs text-white/60">
+          <div>© {new Date().getFullYear()} The Voice Of Vaja · All rights reserved.</div>
+          <div className="flex items-center gap-4">
+            <a href="/sitemap.xml" className="hover:text-white">Sitemap</a>
+            <span className="opacity-30">·</span>
+            <a href="/robots.txt" className="hover:text-white">Robots</a>
+            <span className="opacity-30">·</span>
+            <span>Crafted with care in Chennai</span>
+          </div>
         </div>
       </div>
     </footer>
@@ -824,9 +879,10 @@ function App() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  function enter(target) {
+  function enter(_target) {
     setEntered(true)
-    setTimeout(() => { const el = document.getElementById(target === 'home' ? 'home' : target); if (el) el.scrollIntoView({ behavior: 'smooth' }) }, 600)
+    // Stay at hero — do not auto-scroll; user can navigate via menu.
+    window.scrollTo({ top: 0, behavior: 'instant' })
   }
 
   if (!content) return <Loader />
