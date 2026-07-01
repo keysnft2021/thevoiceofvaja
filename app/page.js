@@ -115,10 +115,10 @@ function WelcomeScreen({ onEnter, welcome }) {
             className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 w-full max-w-4xl">
             <ExploreCard onClick={() => onEnter('music')} icon={Music2} title="Explore Music"
               items={['Original Songs', 'Live Performances', 'Playback Singing', 'Albums', 'Music Videos', 'Collaborations']}
-              bg="https://images.unsplash.com/photo-1565035010268-a3816f98589a?crop=entropy&cs=srgb&fm=jpg&q=85" />
+              bg="/vaja/vaja-021.jpg" />
             <ExploreCard onClick={() => onEnter('voice')} icon={Mic2} title="Explore Voice & Dubbing"
               items={['Dubbing Projects', 'Voice Samples', 'Commercial Voice Overs', 'Movie Projects', 'Character Voices', 'Corporate']}
-              bg="https://images.pexels.com/photos/7901950/pexels-photo-7901950.jpeg?auto=compress&cs=tinysrgb&dpr=2&h=650&w=940" />
+              bg="/vaja/vaja-027.jpg" />
           </motion.div>
           <motion.button initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 2.6 }}
             onClick={() => onEnter('home')} className="mt-10 text-gold hover:text-[color:var(--gold-soft)] text-xs tracking-[0.3em] uppercase link-sweep">
@@ -616,7 +616,7 @@ function Book({ contact }) {
   return (
     <section id="book" className="section-pad bg-navy text-ivory relative overflow-hidden">
       <div className="absolute inset-0 opacity-20 pointer-events-none">
-        <img src="https://images.unsplash.com/photo-1565035010268-a3816f98589a?crop=entropy&cs=srgb&fm=jpg&q=85" alt="" className="w-full h-full object-cover" />
+        <img src="/vaja/vaja-021.jpg" alt="" className="w-full h-full object-cover" />
         <div className="absolute inset-0 bg-gradient-to-t from-navy via-navy/80 to-navy/60" />
       </div>
       <div className="relative mx-auto max-w-6xl px-6 grid lg:grid-cols-12 gap-10">
