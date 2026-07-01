@@ -83,9 +83,6 @@ function Login({ onLogin }) {
             <ArrowLeft className="w-3 h-3" /> Back to site
           </a>
         </div>
-        <p className="mt-6 text-center text-[11px] text-beige/40">
-          Default password: <span className="text-beige">vaja2025admin</span> · Change via env <span className="text-beige">ADMIN_PASSWORD</span>
-        </p>
       </form>
     </div>
   )
