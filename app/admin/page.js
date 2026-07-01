@@ -324,25 +324,32 @@ function CollectionManager({ title, subtitle, endpoint, token, fields, emptyItem
         <div className="space-y-3">
           {items.map((it) => (
             <div key={it.id} className="border border-beige-2 rounded-xl overflow-hidden">
-              <button onClick={() => setExpanded(expanded === it.id ? null : it.id)} className="w-full flex items-center justify-between px-4 py-3 hover:bg-beige/40">
-                <div className="flex items-center gap-3 min-w-0">
-                  {it.image || it.src ? (<img src={it.image || it.src} alt="" className="w-10 h-10 rounded-lg object-cover" />) : (
-                    <div className="w-10 h-10 rounded-lg bg-beige border border-beige-2 flex items-center justify-center text-navy/40"><ImgIcon className="w-4 h-4" /></div>
-                  )}
-                  <div className="text-left min-w-0">
-                    <div className="font-medium text-navy truncate">{it.title || it.name || it.tag || it.year || 'Untitled'}</div>
-                    <div className="text-xs text-navy/50 truncate">{it.role || it.category || it.desc || it.text || ''}</div>
+              <div className="w-full flex items-stretch hover:bg-beige/40">
+                <button
+                  onClick={() => setExpanded(expanded === it.id ? null : it.id)}
+                  className="flex-1 flex items-center justify-between px-4 py-3 text-left"
+                >
+                  <div className="flex items-center gap-3 min-w-0">
+                    {it.image || it.src ? (<img src={it.image || it.src} alt="" className="w-10 h-10 rounded-lg object-cover" />) : (
+                      <div className="w-10 h-10 rounded-lg bg-beige border border-beige-2 flex items-center justify-center text-navy/40"><ImgIcon className="w-4 h-4" /></div>
+                    )}
+                    <div className="text-left min-w-0">
+                      <div className="font-medium text-navy truncate">{it.title || it.name || it.tag || it.year || 'Untitled'}</div>
+                      <div className="text-xs text-navy/50 truncate">{it.role || it.category || it.desc || it.text || ''}</div>
+                    </div>
                   </div>
-                </div>
-                <div className="flex items-center gap-2">
-                  {!it._new && (
-                    <button onClick={(e) => { e.stopPropagation(); deleteItem(it.id) }} className="w-8 h-8 rounded-lg text-navy/50 hover:text-red-600 hover:bg-red-50 flex items-center justify-center">
-                      <Trash2 className="w-4 h-4" />
-                    </button>
-                  )}
-                  <span className="text-navy/40 text-xs">{expanded === it.id ? 'Close' : 'Edit'}</span>
-                </div>
-              </button>
+                  <span className="text-navy/40 text-xs ml-3">{expanded === it.id ? 'Close' : 'Edit'}</span>
+                </button>
+                {!it._new && (
+                  <button
+                    onClick={() => deleteItem(it.id)}
+                    className="w-11 flex items-center justify-center text-navy/50 hover:text-red-600 hover:bg-red-50 border-l border-beige-2"
+                    aria-label="Delete"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </button>
+                )}
+              </div>
               {expanded === it.id && (
                 <div className="p-4 border-t border-beige-2 bg-beige/20 space-y-4">
                   <Row cols={2}>
