@@ -192,6 +192,66 @@ async function handler(request, ctx) {
       return json({ error: 'Invalid credentials' }, { status: 401 })
     }
 
+    // ---------- ADMIN: RESET MEDIA (wipe + re-seed image URLs from SEED) ----------
+    if (path === 'admin/reset-media' && method === 'POST') {
+      if (!isAdmin(request)) return json({ error: 'Unauthorized' }, { status: 401 })
+      const body = await request.json().catch(() => ({}))
+      const mode = body.mode || 'images' // 'images' = only overwrite image fields; 'all' = wipe collections and reseed everything
+
+      const results = { mode, updated: {} }
+
+      if (mode === 'all') {
+        // Nuke and reseed all content collections + site singleton
+        const cols = ['site','timeline','songs','voiceProjects','gallery','testimonials','collaborators','collabHighlights']
+        for (const c of cols) await db.collection(c).deleteMany({})
+        await ensureSeed(db)
+        for (const c of cols) results.updated[c] = await db.collection(c).countDocuments()
+        return json({ success: true, ...results })
+      }
+
+      // Default: overwrite only image-related fields on existing docs, using SEED as source of truth
+      // 1) Site singleton — hero.image + welcome.bgImage
+      await db.collection('site').updateOne(
+        { _id: 'site' },
+        { $set: {
+            'hero.image': SEED.site.hero.image,
+            'welcome.bgImage': SEED.site.welcome.bgImage,
+          } },
+        { upsert: false }
+      )
+      results.updated.site = 1
+
+      // 2) For songs/voiceProjects/gallery, map by title (or tag for gallery) to SEED
+      const mapByKey = (docs, key) => {
+        const m = new Map()
+        for (const d of docs) m.set(d[key], d)
+        return m
+      }
+
+      const songsBySrc = mapByKey(SEED.songs, 'title')
+      let cnt = 0
+      for (const doc of await db.collection('songs').find({}).toArray()) {
+        const seed = songsBySrc.get(doc.title)
+        if (seed?.image) { await db.collection('songs').updateOne({ id: doc.id }, { $set: { image: seed.image } }); cnt++ }
+      }
+      results.updated.songs = cnt
+
+      const voiceBySrc = mapByKey(SEED.voiceProjects, 'title')
+      cnt = 0
+      for (const doc of await db.collection('voiceProjects').find({}).toArray()) {
+        const seed = voiceBySrc.get(doc.title)
+        if (seed?.image) { await db.collection('voiceProjects').updateOne({ id: doc.id }, { $set: { image: seed.image } }); cnt++ }
+      }
+      results.updated.voiceProjects = cnt
+
+      // 3) Gallery: fully replace with SEED gallery (safest — image list is small & curated)
+      await db.collection('gallery').deleteMany({})
+      await db.collection('gallery').insertMany(SEED.gallery.map(g => ({ ...g, id: uuidv4() })))
+      results.updated.gallery = SEED.gallery.length
+
+      return json({ success: true, ...results })
+    }
+
     // ---------- PUBLIC CONTENT ----------
     if (path === 'content' && method === 'GET') {
       const content = await getContent(db)

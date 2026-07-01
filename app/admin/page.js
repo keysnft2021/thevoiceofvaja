@@ -477,6 +477,8 @@ function MessagesView({ token }) {
 // ------------------ OVERVIEW ------------------
 function Overview({ token }) {
   const [stats, setStats] = useState({ songs: 0, voice: 0, gallery: 0, bookings: 0, messages: 0, testimonials: 0 })
+  const [resetting, setResetting] = useState(false)
+
   useEffect(() => {
     Promise.all([
       api('songs').then((d) => d.items?.length || 0),
@@ -487,6 +489,21 @@ function Overview({ token }) {
       api('testimonials').then((d) => d.items?.length || 0),
     ]).then(([songs, voice, gallery, bookings, messages, testimonials]) => setStats({ songs, voice, gallery, bookings, messages, testimonials }))
   }, [token])
+
+  async function resetMedia(mode) {
+    const msg = mode === 'all'
+      ? 'WIPE all content (songs, voice, gallery, timeline, testimonials, collaborators, etc.) and reseed from defaults with Vaja’s real photos?\n\nThis will delete any custom content you have added. Continue?'
+      : 'Reset ALL images (hero, welcome, songs, voice projects, gallery) to the default Vaja photos?\n\nText/content will not be touched. Continue?'
+    if (!confirm(msg)) return
+    setResetting(true)
+    try {
+      const res = await api('admin/reset-media', { method: 'POST', body: JSON.stringify({ mode }) }, token)
+      toast.success(`Reset complete — ${JSON.stringify(res.updated)}`)
+      setTimeout(() => window.location.reload(), 1000)
+    } catch (e) { toast.error(e.message || 'Reset failed') }
+    finally { setResetting(false) }
+  }
+
   const tiles = [
     { label: 'Songs', value: stats.songs, icon: Music2, color: 'from-navy to-navy-soft' },
     { label: 'Voice Projects', value: stats.voice, icon: Mic2, color: 'from-navy-soft to-navy' },
@@ -521,6 +538,45 @@ function Overview({ token }) {
           <div className="rounded-xl border border-beige-2 p-4 flex items-center gap-3">
             <Upload className="w-5 h-5 text-gold" />
             <div><div className="font-medium text-navy">Media uploads</div><div className="text-xs text-navy/50">Images stored in DB (≤ 8MB each)</div></div>
+          </div>
+        </div>
+      </Card>
+
+      <Card title="Restore default media" subtitle="Use this after deploying to a new environment where images are missing.">
+        <div className="space-y-3">
+          <div className="rounded-xl border border-beige-2 bg-beige/30 p-4">
+            <div className="flex items-start justify-between gap-4 flex-wrap">
+              <div className="max-w-xl">
+                <div className="font-medium text-navy">Reset all images to defaults</div>
+                <p className="text-xs text-navy/60 mt-1">
+                  Overwrites hero portrait, welcome background, song covers, voice project images and the entire gallery with Vaja’s real photos from <code>/vaja/*.jpg</code>. Text content is untouched.
+                </p>
+              </div>
+              <button
+                disabled={resetting}
+                onClick={() => resetMedia('images')}
+                className="rounded-full bg-navy text-ivory text-xs px-4 py-2 inline-flex items-center gap-1.5 disabled:opacity-60"
+              >
+                {resetting ? <Loader2 className="w-3 h-3 animate-spin" /> : <ImgIcon className="w-3 h-3" />} Reset images
+              </button>
+            </div>
+          </div>
+          <div className="rounded-xl border border-red-200 bg-red-50/50 p-4">
+            <div className="flex items-start justify-between gap-4 flex-wrap">
+              <div className="max-w-xl">
+                <div className="font-medium text-red-800">Full factory reset</div>
+                <p className="text-xs text-red-800/70 mt-1">
+                  <b>Destructive.</b> Wipes songs, voice projects, gallery, timeline, testimonials, collaborators, and collab highlights, then reseeds everything from defaults. Bookings, messages, and admin uploads are preserved.
+                </p>
+              </div>
+              <button
+                disabled={resetting}
+                onClick={() => resetMedia('all')}
+                className="rounded-full bg-red-600 text-white text-xs px-4 py-2 inline-flex items-center gap-1.5 hover:bg-red-700 disabled:opacity-60"
+              >
+                {resetting ? <Loader2 className="w-3 h-3 animate-spin" /> : <Trash2 className="w-3 h-3" />} Full reset
+              </button>
+            </div>
           </div>
         </div>
       </Card>
