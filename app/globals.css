@@ -79,6 +79,12 @@ html, body {
 }
 .float-slow { animation: floatY 6s ease-in-out infinite; }
 
+/* Mic loader — pulsing sound waves */
+@keyframes micWave {
+  0%   { transform: scale(0.7); opacity: 0.9; }
+  100% { transform: scale(1.9); opacity: 0; }
+}
+
 /* Underline sweep */
 .link-sweep { position: relative; }
 .link-sweep::after {

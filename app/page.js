@@ -853,13 +853,89 @@ function Footer({ contact }) {
 // ------------- LOADER -------------
 function Loader() {
   return (
-    <div className="fixed inset-0 z-[200] bg-ivory flex items-center justify-center">
-      <div className="flex flex-col items-center gap-4">
-        <div className="relative w-16 h-16">
-          <div className="absolute inset-0 rounded-full border-2 border-beige-2" />
-          <div className="absolute inset-0 rounded-full border-2 border-gold border-t-transparent animate-spin" />
+    <div className="fixed inset-0 z-[200] bg-ivory flex items-center justify-center overflow-hidden">
+      {/* Soft radial glow behind mic */}
+      <div className="absolute w-[420px] h-[420px] rounded-full"
+           style={{ background: 'radial-gradient(circle, rgba(201,169,74,0.18), transparent 60%)' }} />
+
+      <div className="relative flex flex-col items-center gap-6">
+        {/* Vintage mic + sound waves */}
+        <div className="relative w-32 h-32 flex items-center justify-center">
+          {/* Pulsing sound waves */}
+          <span className="absolute inset-0 rounded-full border border-gold/40"
+                style={{ animation: 'micWave 2.4s ease-out infinite' }} />
+          <span className="absolute inset-0 rounded-full border border-gold/30"
+                style={{ animation: 'micWave 2.4s ease-out 0.8s infinite' }} />
+          <span className="absolute inset-0 rounded-full border border-gold/20"
+                style={{ animation: 'micWave 2.4s ease-out 1.6s infinite' }} />
+
+          {/* Rotating gold ring */}
+          <span className="absolute w-24 h-24 rounded-full border-2 border-transparent"
+                style={{ borderTopColor: 'var(--gold)', borderRightColor: 'var(--gold-soft)', animation: 'spin 2s linear infinite' }} />
+
+          {/* Vintage microphone SVG */}
+          <svg viewBox="0 0 64 96" className="relative w-16 h-24 float-slow" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+            <defs>
+              <linearGradient id="micBody" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#1E2C4C" />
+                <stop offset="100%" stopColor="#0E1B33" />
+              </linearGradient>
+              <linearGradient id="micGrille" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#E4CE8A" />
+                <stop offset="60%" stopColor="#C9A94A" />
+                <stop offset="100%" stopColor="#8E7627" />
+              </linearGradient>
+              <linearGradient id="micShine" x1="0" y1="0" x2="1" y2="0">
+                <stop offset="0%" stopColor="rgba(255,255,255,0.55)" />
+                <stop offset="50%" stopColor="rgba(255,255,255,0)" />
+                <stop offset="100%" stopColor="rgba(255,255,255,0)" />
+              </linearGradient>
+            </defs>
+
+            {/* Top yoke pivot */}
+            <rect x="26" y="4" width="12" height="4" rx="1.5" fill="#0E1B33" />
+
+            {/* Yoke arms */}
+            <path d="M14 22 C14 12, 22 8, 32 8 C42 8, 50 12, 50 22" stroke="#0E1B33" strokeWidth="2.5" fill="none" strokeLinecap="round" />
+
+            {/* Mic head — vintage capsule shape */}
+            <rect x="16" y="16" width="32" height="42" rx="16" fill="url(#micBody)" stroke="#0E1B33" strokeWidth="1.5" />
+
+            {/* Grille horizontal bars */}
+            <g stroke="url(#micGrille)" strokeWidth="1.8" strokeLinecap="round">
+              <line x1="20" y1="24" x2="44" y2="24" />
+              <line x1="20" y1="30" x2="44" y2="30" />
+              <line x1="20" y1="36" x2="44" y2="36" />
+              <line x1="20" y1="42" x2="44" y2="42" />
+              <line x1="20" y1="48" x2="44" y2="48" />
+            </g>
+
+            {/* Gold bezel around grille */}
+            <rect x="16" y="16" width="32" height="42" rx="16" fill="none" stroke="url(#micGrille)" strokeWidth="2" opacity="0.9" />
+
+            {/* Highlight shine */}
+            <rect x="18" y="18" width="10" height="38" rx="8" fill="url(#micShine)" opacity="0.6" />
+
+            {/* Neck / body */}
+            <rect x="28" y="58" width="8" height="14" fill="#0E1B33" />
+            <rect x="26" y="70" width="12" height="4" rx="1.5" fill="#C9A94A" />
+            <rect x="27" y="74" width="10" height="16" rx="1.5" fill="#0E1B33" />
+            <rect x="24" y="90" width="16" height="4" rx="1.5" fill="#0E1B33" />
+          </svg>
         </div>
-        <div className="font-serif text-navy text-lg">The Voice Of Vaja</div>
+
+        {/* Wordmark */}
+        <div className="text-center">
+          <div className="text-[10px] tracking-[0.4em] uppercase text-gold">Tuning in</div>
+          <div className="mt-1 font-serif text-navy text-xl">The Voice Of Vaja</div>
+          {/* Animated equalizer bars */}
+          <div className="mt-3 flex items-end justify-center gap-[3px] h-4">
+            {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9].map((i) => (
+              <span key={i} className="w-[3px] rounded-full bg-navy/80"
+                    style={{ height: `${30 + ((i * 17) % 70)}%`, animation: `bar 1.1s ease-in-out ${i * 80}ms infinite` }} />
+            ))}
+          </div>
+        </div>
       </div>
     </div>
   )
