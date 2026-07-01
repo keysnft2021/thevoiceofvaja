@@ -128,15 +128,20 @@ const SEED = {
 
 async function ensureSeed(db) {
   const site = await db.collection('site').findOne({ _id: 'site' })
-  if (!site) {
-    await db.collection('site').insertOne(SEED.site)
-    await db.collection('timeline').insertMany(SEED.timeline)
-    await db.collection('songs').insertMany(SEED.songs)
-    await db.collection('voiceProjects').insertMany(SEED.voiceProjects)
-    await db.collection('gallery').insertMany(SEED.gallery)
-    await db.collection('testimonials').insertMany(SEED.testimonials)
-    await db.collection('collaborators').insertMany(SEED.collaborators)
-    await db.collection('collabHighlights').insertMany(SEED.collabHighlights)
+  if (!site) await db.collection('site').insertOne(SEED.site)
+  // Each collection: only seed if empty
+  const seedMap = [
+    ['timeline', SEED.timeline],
+    ['songs', SEED.songs],
+    ['voiceProjects', SEED.voiceProjects],
+    ['gallery', SEED.gallery],
+    ['testimonials', SEED.testimonials],
+    ['collaborators', SEED.collaborators],
+    ['collabHighlights', SEED.collabHighlights],
+  ]
+  for (const [name, docs] of seedMap) {
+    const count = await db.collection(name).countDocuments()
+    if (count === 0) await db.collection(name).insertMany(docs)
   }
 }
 
@@ -203,7 +208,16 @@ async function handler(request, ctx) {
       if (!isAdmin(request)) return json({ error: 'Unauthorized' }, { status: 401 })
       const body = await request.json()
       delete body._id
-      await db.collection('site').updateOne({ _id: 'site' }, { $set: body }, { upsert: true })
+      // Deep-merge nested objects so partial updates don't wipe other keys.
+      const flat = {}
+      for (const [k, v] of Object.entries(body)) {
+        if (v && typeof v === 'object' && !Array.isArray(v)) {
+          for (const [kk, vv] of Object.entries(v)) flat[`${k}.${kk}`] = vv
+        } else {
+          flat[k] = v
+        }
+      }
+      await db.collection('site').updateOne({ _id: 'site' }, { $set: flat }, { upsert: true })
       return json({ success: true })
     }
 

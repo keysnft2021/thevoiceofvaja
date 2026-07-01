@@ -111,8 +111,8 @@ html, body {
 .border-gold { border-color: var(--gold); }
 .border-beige-2 { border-color: var(--beige-2); }
 
-/* Section paddings */
-.section-pad { padding-top: clamp(4rem, 8vw, 7rem); padding-bottom: clamp(4rem, 8vw, 7rem); }
+/* Section paddings — tighter */
+.section-pad { padding-top: clamp(2.5rem, 5vw, 4.5rem); padding-bottom: clamp(2.5rem, 5vw, 4.5rem); }
 
 /* Selection */
 ::selection { background: var(--gold); color: var(--navy); }

@@ -27,15 +27,18 @@ const EVENT_TYPES = [
   'Dubbing Project', 'Advertisement', 'Other'
 ]
 
-function useReveal() {
+function useReveal(dep) {
   useEffect(() => {
-    const els = document.querySelectorAll('.reveal')
+    if (!dep) return
+    const els = document.querySelectorAll('.reveal:not(.in)')
     const io = new IntersectionObserver((entries) => {
       entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target) } })
-    }, { threshold: 0.12 })
+    }, { threshold: 0.08 })
     els.forEach((el) => io.observe(el))
-    return () => io.disconnect()
-  }, [])
+    // Force-visible after 2s in case observer misses (safety fallback)
+    const timer = setTimeout(() => document.querySelectorAll('.reveal:not(.in)').forEach(el => el.classList.add('in')), 2000)
+    return () => { io.disconnect(); clearTimeout(timer) }
+  }, [dep])
 }
 
 function Counter({ value, suffix = '' }) {
@@ -90,26 +93,26 @@ function WelcomeScreen({ onEnter, welcome }) {
         className="absolute -top-40 left-1/2 -translate-x-1/2 w-[70vw] h-[70vw] max-w-[900px] max-h-[900px] rounded-full"
         style={{ background: 'radial-gradient(circle, rgba(228,206,138,0.35), transparent 60%)' }} />
       <div className="relative z-10 h-full flex flex-col">
-        <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="pt-8 md:pt-12 text-center">
+        <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="pt-6 md:pt-8 text-center">
           <span className="inline-flex items-center gap-2 text-[10px] md:text-xs tracking-[0.3em] text-gold uppercase">
             <span className="h-px w-8 bg-gold" /> Official Welcome <span className="h-px w-8 bg-gold" />
           </span>
         </motion.div>
-        <div className="flex-1 flex flex-col items-center justify-center px-6 text-center">
+        <div className="flex-1 flex flex-col items-center justify-center px-6 text-center py-8">
           <motion.h1 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.6, duration: 1 }}
             className="font-serif text-4xl sm:text-6xl md:text-7xl lg:text-8xl text-ivory tracking-tight leading-[1.05]">
             {welcome.title}
           </motion.h1>
           <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} transition={{ delay: 1.1, duration: 1 }}
-            className="mt-6 text-beige/90 text-sm md:text-base tracking-[0.3em] uppercase">
+            className="mt-5 text-gold text-sm md:text-base tracking-[0.3em] uppercase">
             {welcome.subtitle}
           </motion.p>
           <motion.h2 initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 1.6, duration: 0.8 }}
-            className="mt-14 md:mt-20 font-corm italic text-2xl md:text-4xl text-ivory/90">
+            className="mt-10 md:mt-14 font-corm italic text-2xl md:text-4xl text-ivory">
             “{welcome.question}”
           </motion.h2>
           <motion.div initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 2.0, duration: 0.9 }}
-            className="mt-10 grid grid-cols-1 md:grid-cols-2 gap-5 md:gap-8 w-full max-w-4xl">
+            className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 w-full max-w-4xl">
             <ExploreCard onClick={() => onEnter('music')} icon={Music2} title="Explore Music"
               items={['Original Songs', 'Live Performances', 'Playback Singing', 'Albums', 'Music Videos', 'Collaborations']}
               bg="https://images.unsplash.com/photo-1565035010268-a3816f98589a?crop=entropy&cs=srgb&fm=jpg&q=85" />
@@ -142,7 +145,7 @@ function ExploreCard({ onClick, icon: Icon, title, items, bg }) {
       </div>
       <div className="relative z-10">
         <h3 className="font-serif text-2xl md:text-3xl text-ivory mb-3">{title}</h3>
-        <p className="text-beige/80 text-xs md:text-sm leading-relaxed">{items.slice(0, 5).join(' · ')}</p>
+        <p className="text-ivory/90 text-xs md:text-sm leading-relaxed">{items.slice(0, 5).join(' · ')}</p>
       </div>
       <div className="absolute inset-0 rounded-2xl ring-0 group-hover:ring-1 ring-gold/60 transition-all duration-500 pointer-events-none" />
     </motion.button>
@@ -203,42 +206,38 @@ function Nav({ scrolled }) {
 
 // ------------- HERO -------------
 function Hero({ hero }) {
-  const ref = useRef(null)
-  const { scrollYProgress } = useScroll({ target: ref, offset: ['start start', 'end start'] })
-  const y = useTransform(scrollYProgress, [0, 1], ['0%', '30%'])
-  const opacity = useTransform(scrollYProgress, [0, 1], [1, 0])
   return (
-    <section id="home" ref={ref} className="relative min-h-[100svh] overflow-hidden bg-ivory pt-28 pb-16">
-      <div className="mx-auto max-w-7xl px-6 grid lg:grid-cols-12 gap-10 items-center min-h-[80vh]">
-        <motion.div style={{ opacity }} className="lg:col-span-6 relative z-10">
-          <div className="flex items-center gap-3 mb-6">
+    <section id="home" className="relative overflow-hidden bg-ivory pt-24 pb-8">
+      <div className="mx-auto max-w-7xl px-6 grid lg:grid-cols-12 gap-8 items-center min-h-[70vh]">
+        <div className="lg:col-span-6 relative z-10">
+          <div className="flex items-center gap-3 mb-5">
             <span className="h-px w-10 bg-gold" />
             <span className="text-[11px] tracking-[0.35em] uppercase text-navy/70">{hero.eyebrow}</span>
           </div>
-          <h1 className="font-serif text-5xl sm:text-6xl md:text-7xl leading-[1.02] text-navy">
+          <h1 className="font-serif text-4xl sm:text-5xl md:text-6xl leading-[1.05] text-navy">
             {hero.titleLine1} <br />
             <span className="italic text-gold-grad">{hero.titleLine2}</span>
           </h1>
-          <p className="mt-6 text-navy/70 text-base md:text-lg leading-relaxed max-w-xl">{hero.intro}</p>
-          <div className="mt-8 flex flex-wrap items-center gap-3">
+          <p className="mt-5 text-navy/75 text-base leading-relaxed max-w-xl">{hero.intro}</p>
+          <div className="mt-7 flex flex-wrap items-center gap-3">
             <a href="#music" className="inline-flex items-center gap-2 rounded-full bg-navy text-ivory px-6 py-3 text-sm hover:bg-navy-soft transition-colors"><Play className="w-4 h-4" /> Listen Now</a>
             <a href="#voice" className="inline-flex items-center gap-2 rounded-full border border-navy/25 bg-white/60 text-navy px-6 py-3 text-sm hover:bg-white transition-colors"><Mic2 className="w-4 h-4" /> Explore Voice Projects</a>
             <a href="#book" className="inline-flex items-center gap-2 rounded-full border border-gold bg-gold/10 text-navy px-6 py-3 text-sm hover:bg-gold/20 transition-colors"><Sparkles className="w-4 h-4 text-gold" /> Book Vaja</a>
           </div>
-          <div className="mt-10 flex flex-wrap items-center gap-x-6 gap-y-3 text-xs text-navy/60">
+          <div className="mt-7 flex flex-wrap items-center gap-x-6 gap-y-3 text-xs text-navy/60">
             <span className="flex items-center gap-2"><Award className="w-4 h-4 text-gold" /> WOW Awards Asia 2023</span>
             <span className="flex items-center gap-2"><Star className="w-4 h-4 text-gold" /> CSK Collaboration</span>
             <span className="flex items-center gap-2"><Globe className="w-4 h-4 text-gold" /> 5 Languages</span>
           </div>
-        </motion.div>
-        <motion.div style={{ y }} className="lg:col-span-6 relative">
-          <div className="relative aspect-[4/5] max-w-[520px] mx-auto">
+        </div>
+        <div className="lg:col-span-6 relative">
+          <div className="relative aspect-[4/5] max-w-[460px] mx-auto">
             <div className="absolute -inset-6 rounded-[2rem] bg-gradient-to-br from-gold/20 via-beige to-transparent blur-2xl" />
-            <div className="relative rounded-[2rem] overflow-hidden border border-beige-2 shadow-[0_50px_100px_-30px_rgba(14,27,51,0.35)]">
-              <img src={hero.image} alt="Vaja" className="w-full h-full object-cover" />
+            <div className="relative rounded-[2rem] overflow-hidden border border-beige-2 shadow-[0_50px_100px_-30px_rgba(14,27,51,0.35)] h-full">
+              <img src={hero.image} alt="Vaja" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
               <div className="absolute inset-0 bg-gradient-to-t from-navy/40 via-transparent to-transparent" />
               <motion.div animate={{ y: [0, -12, 0] }} transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-                className="absolute -left-6 md:-left-10 bottom-16 bg-ivory rounded-2xl border border-beige-2 shadow-xl p-3 pr-5 flex items-center gap-3">
+                className="absolute -left-4 md:-left-8 bottom-14 bg-ivory rounded-2xl border border-beige-2 shadow-xl p-3 pr-5 flex items-center gap-3">
                 <div className="w-10 h-10 rounded-xl bg-navy text-gold flex items-center justify-center"><Music className="w-5 h-5" /></div>
                 <div>
                   <div className="text-[10px] tracking-widest uppercase text-muted-ink">Now Playing</div>
@@ -246,7 +245,7 @@ function Hero({ hero }) {
                 </div>
               </motion.div>
               <motion.div animate={{ y: [0, 12, 0] }} transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
-                className="absolute -right-4 md:-right-8 top-12 bg-ivory rounded-2xl border border-beige-2 shadow-xl px-4 py-3">
+                className="absolute -right-3 md:-right-6 top-10 bg-ivory rounded-2xl border border-beige-2 shadow-xl px-4 py-3">
                 <div className="flex items-center gap-2">
                   <span className="w-2 h-2 rounded-full bg-gold animate-pulse" />
                   <div className="text-[10px] tracking-widest uppercase text-muted-ink">Live Booking</div>
@@ -255,10 +254,10 @@ function Hero({ hero }) {
               </motion.div>
             </div>
           </div>
-        </motion.div>
+        </div>
       </div>
-      <div className="mt-10 border-y border-beige-2 bg-beige/50 overflow-hidden">
-        <div className="flex marquee-track py-4">
+      <div className="mt-8 border-y border-beige-2 bg-beige/50 overflow-hidden">
+        <div className="flex marquee-track py-3">
           {[...Array(2)].map((_, k) => (
             <div key={k} className="flex items-center gap-14 pr-14 text-navy/70 font-serif text-lg italic whitespace-nowrap">
               {['Tamil','English','Hindi','Telugu','Malayalam','Originals','Playback','Live','Voice-Overs','Dubbing','Tamil','English','Hindi','Telugu','Malayalam','Originals','Playback','Live'].map((t, i) => (
@@ -816,7 +815,7 @@ function App() {
   const [entered, setEntered] = useState(false)
   const [scrolled, setScrolled] = useState(false)
   const [content, setContent] = useState(null)
-  useReveal()
+  useReveal(content)
 
   useEffect(() => {
     fetch('/api/content').then((r) => r.json()).then(setContent).catch(() => {})
