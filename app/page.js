@@ -135,17 +135,24 @@ function ExploreCard({ onClick, icon: Icon, title, items, bg }) {
   return (
     <motion.button whileHover={{ y: -8 }} whileTap={{ scale: 0.98 }} onClick={onClick}
       className="group relative overflow-hidden rounded-2xl border border-gold/30 bg-navy-soft/50 backdrop-blur text-left p-6 md:p-8 h-[260px] md:h-[300px] flex flex-col justify-between">
-      <div className="absolute inset-0 opacity-60 group-hover:opacity-70 transition-opacity duration-700">
+      <div className="absolute inset-0 opacity-70 group-hover:opacity-80 transition-opacity duration-700">
         <img src={bg} alt="" className="w-full h-full object-cover" />
-        <div className="absolute inset-0 bg-gradient-to-br from-navy/95 via-navy/85 to-navy/70" />
       </div>
+      {/* Global darkening for the whole card */}
+      <div className="absolute inset-0 bg-navy/55 group-hover:bg-navy/45 transition-colors duration-700" />
+      {/* Stronger dark wash on the bottom half where text sits */}
+      <div className="absolute inset-x-0 bottom-0 h-3/5 bg-gradient-to-t from-navy via-navy/85 to-transparent" />
       <div className="relative z-10 flex items-center justify-between">
-        <div className="w-12 h-12 rounded-full border border-gold/60 flex items-center justify-center text-gold"><Icon className="w-5 h-5" /></div>
-        <ArrowUpRight className="w-6 h-6 text-gold/70 group-hover:text-gold group-hover:rotate-45 transition-all duration-500" />
+        <div className="w-12 h-12 rounded-full border border-gold/60 bg-navy/60 backdrop-blur flex items-center justify-center text-gold">
+          <Icon className="w-5 h-5" />
+        </div>
+        <ArrowUpRight className="w-6 h-6 text-gold group-hover:rotate-45 transition-all duration-500 drop-shadow-[0_2px_6px_rgba(14,27,51,0.9)]" />
       </div>
       <div className="relative z-10">
-        <h3 className="font-serif text-2xl md:text-3xl text-ivory mb-3">{title}</h3>
-        <p className="text-ivory/90 text-xs md:text-sm leading-relaxed">{items.slice(0, 5).join(' · ')}</p>
+        <h3 className="font-serif text-2xl md:text-3xl text-ivory mb-2 drop-shadow-[0_2px_8px_rgba(14,27,51,0.9)]">{title}</h3>
+        <p className="text-ivory text-[13px] md:text-sm leading-relaxed drop-shadow-[0_1px_4px_rgba(14,27,51,0.85)]">
+          {items.slice(0, 5).join(' · ')}
+        </p>
       </div>
       <div className="absolute inset-0 rounded-2xl ring-0 group-hover:ring-1 ring-gold/60 transition-all duration-500 pointer-events-none" />
     </motion.button>
