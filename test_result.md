@@ -230,7 +230,7 @@ frontend:
 
   - task: "Public single-page site (Hero, About+Timeline, Music, Voice, Gallery, Collabs, Testimonials, Book, Contact)"
     implemented: true
-    working: "NA"
+    working: true
     file: "app/page.js"
     stuck_count: 0
     priority: "high"
@@ -239,6 +239,9 @@ frontend:
       - working: "NA"
         agent: "main"
         comment: "All content hydrates from /api/content. Includes booking form (POST /api/bookings) and contact form (POST /api/contact)."
+      - working: true
+        agent: "testing"
+        comment: "✅ GALLERY SLIDER REGRESSION TEST PASSED. Tested after image skewing bug fix. Desktop (1440x900) & Mobile (390x844) both verified. CRITICAL CHECKS: (1) First slide shows newest gallery item 'The Voice of Vaja' (g5.jpg) with counter '01 / 05' ✓ (2) All 5 images use object-contain (no skewing/cropping) ✓ (3) Beige letterbox background present on all slides ✓ (4) Captions render BELOW frame (not overlaid) ✓ (5) All aspect ratios preserved correctly: g5.jpg (1280x720, 1.78:1), g4.jpg (1280x310, 4.13:1 wide banner), g3.jpg (1280x827, 1.55:1), g2.jpg (1280x240, 5.33:1 very wide banner), g1.jpg (1280x750, 1.71:1) ✓ INTERACTIVE FEATURES: Auto-advance works (5.5s interval), hover pause/resume works, manual arrows (left/right) work, thumbnail navigation works, dot indicators work, play/pause toggle present, lightbox opens/closes correctly ✓ WELCOME SCREEN: Renders with title, subtitle, two Explore cards; clicking 'Explore Music' dismisses and stays at scrollY=0 ✓ PAGE SMOKE CHECK: Hero with B&W portrait visible, Music section shows 6 song cards, Voice section visible, Testimonials visible, Footer with sitemap visible ✓ No console errors, no network errors. Mobile responsive - all features work on 390x844 viewport."
 
   - task: "Admin panel with full CMS"
     implemented: true
@@ -305,3 +308,103 @@ agent_communication:
       - All CRUD operations verified with GET after modifications
       
       All backend tasks marked as working:true with needs_retesting:false.
+
+
+
+  - agent: "main"
+    message: |
+      **Frontend bug reported and fixed (Gallery slider)**
+
+      Issue: The gallery slider was skewing images and captions. Images with different aspect
+      ratios (some tall, some wide banner strips 1280x240 or 1280x310) were being cropped/skewed
+      because the frame used `object-cover` inside a fixed `aspect-[21/9]` container. The caption
+      overlaid on wide-strip images obscured text baked into the image.
+
+      Fix (in `/app/app/page.js` - `Gallery` component):
+      - Frame now uses fixed heights (260/360/480/540 across breakpoints) with a soft beige→ivory
+        gradient background acting as a natural letterbox.
+      - Images now use `object-contain` (no cropping, no skewing regardless of aspect ratio).
+      - Thumbnails also use `object-contain` so no skewed previews.
+      - `AnimatePresence` switched from `mode="sync"` to `mode="wait"` for cleaner transitions.
+      - Directional slide-fade (60px x-offset + opacity, cubic-bezier ease) replaces the choppy
+        crossfade.
+      - Caption moved BELOW the frame so wide-strip images with baked-in text aren't obscured.
+      - Progress bar retained at bottom of frame.
+      - Prev/next arrows visible on both mobile and desktop with proper contrast.
+      - Auto-advance interval bumped to 5.5s.
+
+      **Please test frontend Gallery slider ONLY:**
+      1) Load the site (external URL). Dismiss the welcome screen (click any Explore card).
+      2) Scroll to the Gallery section (#gallery).
+      3) Verify:
+         a) First slide shown is the "The Voice of Vaja" collage image (the LAST/newest one in the
+            admin, sorted by createdAt desc).
+         b) The counter shows "01 / 05".
+         c) Wait ~6 seconds — the slider should auto-advance and the counter goes to "02 / 05".
+         d) Hover over the slider — auto-advance should pause; move mouse out — resume.
+         e) Click the right arrow — counter advances by 1; click left — goes back.
+         f) Click any thumbnail — slider jumps to that slide.
+         g) Click the dots — same behavior.
+         h) Click the play/pause button in the header — toggles auto-play.
+         i) Click on the slide image — opens a lightbox with the image at full size and caption
+            at the bottom. Click anywhere or the X to close.
+         j) Verify no image is being SKEWED / CROPPED. All aspect ratios (banner strips 1280x240,
+            wide banners 1280x750, taller 1280x827) should display in full inside the frame with
+            beige letterboxing filling the rest — never stretched.
+         k) Verify captions appear BELOW the frame (not overlaid), and change with each slide.
+      4) Also verify the rest of the page still works: welcome screen, hero, music section,
+         voice section, book form (no submission — just fields render), footer.
+
+      **Do NOT test anything under `/admin`**. The gallery admin CRUD works via the same generic
+      collection manager already tested — this bug fix is UI-only on the public site.
+
+      **Do NOT re-test backend endpoints.** They were already verified in the previous run.
+  
+  - agent: "testing"
+    message: |
+      ✅ GALLERY SLIDER REGRESSION TEST COMPLETE - ALL TESTS PASSED
+      
+      Tested the Gallery slider after the image skewing bug fix on both desktop (1440x900) and mobile (390x844) viewports.
+      
+      **CRITICAL VERIFICATIONS (ALL PASSED):**
+      ✓ First slide is "The Voice of Vaja" collage (g5.jpg) - newest gallery item
+      ✓ Counter shows "01 / 05" correctly
+      ✓ All 5 images use object-contain (NO skewing or cropping)
+      ✓ Beige letterbox background present on all slides
+      ✓ Captions render BELOW the frame (not overlaid on images)
+      ✓ All aspect ratios preserved perfectly:
+        - g5.jpg: 1280x720 (1.78:1) standard widescreen
+        - g4.jpg: 1280x310 (4.13:1) wide banner strip
+        - g3.jpg: 1280x827 (1.55:1) taller image
+        - g2.jpg: 1280x240 (5.33:1) very wide banner strip
+        - g1.jpg: 1280x750 (1.71:1) standard widescreen
+      
+      **INTERACTIVE FEATURES (ALL WORKING):**
+      ✓ Auto-advance: Slides change automatically after ~5.5 seconds
+      ✓ Hover pause: Auto-advance pauses on hover, resumes when mouse leaves
+      ✓ Manual navigation: Left/right arrows advance/go back correctly
+      ✓ Thumbnail navigation: Clicking thumbnails jumps to correct slide
+      ✓ Dot indicators: Clicking dots jumps to correct slide
+      ✓ Play/Pause toggle: Button present and functional
+      ✓ Lightbox: Opens on image click, displays full-size image with caption, closes via X button
+      
+      **WELCOME SCREEN & PAGE SMOKE CHECK:**
+      ✓ Welcome screen renders with title, subtitle, two Explore cards
+      ✓ Clicking "Explore Music" dismisses welcome and stays at scrollY=0
+      ✓ Hero section visible with B&W portrait and heading
+      ✓ Music section shows 6 song cards
+      ✓ Voice & Dubbing section visible
+      ✓ Testimonials section visible
+      ✓ Footer visible with sitemap
+      
+      **MOBILE RESPONSIVE:**
+      ✓ Gallery works correctly on mobile (390x844)
+      ✓ Wide banner images (5.33:1 aspect) display without skewing on mobile
+      ✓ All interactive features work on mobile
+      
+      **NO ISSUES FOUND:**
+      ✓ No console errors
+      ✓ No network errors
+      ✓ No layout issues on desktop or mobile
+      
+      The Gallery slider bug fix is SUCCESSFUL. All images display with correct aspect ratios, no skewing or cropping, with proper beige letterboxing. All interactive features work as expected.

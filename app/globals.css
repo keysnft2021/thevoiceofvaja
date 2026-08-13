@@ -85,6 +85,12 @@ html, body {
   100% { transform: scale(1.9); opacity: 0; }
 }
 
+/* Gallery Ken Burns — subtle zoom while a slide is on screen */
+@keyframes kenburns {
+  0%   { transform: scale(1.02); }
+  100% { transform: scale(1.06); }
+}
+
 /* Underline sweep */
 .link-sweep { position: relative; }
 .link-sweep::after {

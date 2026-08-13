@@ -90,22 +90,20 @@ const SEED = {
     { id: uuidv4(), title: 'EA — Ice Water Sports Arena', role: 'Commissioned Anthem', year: 2023, language: 'English', genre: 'Anthem', desc: 'A commissioned anthem crafted for the EA — Ice Water Sports Arena property.', image: '/vaja/vaja-013.jpg', tag: 'Commissioned', audioUrl: '', videoUrl: '', streamUrl: '' },
   ],
   voiceProjects: [
-    { id: uuidv4(), title: 'Corporate Brand Film', category: 'Corporate', language: 'English', desc: 'A warm, authoritative brand narration for a leading Indian corporate.', image: '/vaja/vaja-027.jpg', audioUrl: '' },
-    { id: uuidv4(), title: 'Cinematic Character Voice', category: 'Character', language: 'Tamil', desc: 'A distinctive character voice for a short film — recorded in-studio, Chennai.', image: '/vaja/vaja-013.jpg', audioUrl: '' },
-    { id: uuidv4(), title: 'Multilingual TVC', category: 'Commercial', language: 'Multi', desc: 'National television commercial voiced in Tamil, Hindi and English.', image: '/vaja/vaja-004.jpg', audioUrl: '' },
-    { id: uuidv4(), title: 'OTT Series Dubbing', category: 'Dubbing', language: 'Tamil', desc: 'Full-length dubbing engagement for a streaming series (Tamil track).', image: '/vaja/vaja-021.jpg', audioUrl: '' },
-    { id: uuidv4(), title: 'Radio Jingle Pack', category: 'Commercial', language: 'English', desc: 'A vibrant jingle pack for a lifestyle FM property.', image: '/vaja/vaja-063.jpg', audioUrl: '' },
-    { id: uuidv4(), title: 'Explainer Voice Over', category: 'Corporate', language: 'English', desc: 'Product explainer for a SaaS launch — crisp, clear, on-brand.', image: '/vaja/vaja-027.jpg', audioUrl: '' },
+    { id: uuidv4(), title: 'Corporate Brand Film', category: 'Corporate', language: 'English', desc: 'A warm, authoritative brand narration for a leading Indian corporate.', image: '/vaja/vaja-027.jpg', linkUrl: '' },
+    { id: uuidv4(), title: 'Cinematic Character Voice', category: 'Character', language: 'Tamil', desc: 'A distinctive character voice for a short film — recorded in-studio, Chennai.', image: '/vaja/vaja-013.jpg', linkUrl: '' },
+    { id: uuidv4(), title: 'Multilingual TVC', category: 'Commercial', language: 'Multi', desc: 'National television commercial voiced in Tamil, Hindi and English.', image: '/vaja/vaja-004.jpg', linkUrl: '' },
+    { id: uuidv4(), title: 'OTT Series Dubbing', category: 'Dubbing', language: 'Tamil', desc: 'Full-length dubbing engagement for a streaming series (Tamil track).', image: '/vaja/vaja-021.jpg', linkUrl: '' },
+    { id: uuidv4(), title: 'Radio Jingle Pack', category: 'Commercial', language: 'English', desc: 'A vibrant jingle pack for a lifestyle FM property.', image: '/vaja/vaja-063.jpg', linkUrl: '' },
+    { id: uuidv4(), title: 'Explainer Voice Over', category: 'Corporate', language: 'English', desc: 'Product explainer for a SaaS launch — crisp, clear, on-brand.', image: '/vaja/vaja-027.jpg', linkUrl: '' },
   ],
   gallery: [
-    { id: uuidv4(), src: '/vaja/vaja-013.jpg', tag: 'Live', span: 'row-span-2' },
-    { id: uuidv4(), src: '/vaja/vaja-004.jpg', tag: 'Studio', span: '' },
-    { id: uuidv4(), src: '/vaja/vaja-063.jpg', tag: 'Concert', span: '' },
-    { id: uuidv4(), src: '/vaja/vaja-021.jpg', tag: 'Stage', span: 'col-span-2' },
-    { id: uuidv4(), src: '/vaja/vaja-013.jpg', tag: 'Portrait', span: '' },
-    { id: uuidv4(), src: '/vaja/vaja-027.jpg', tag: 'Session', span: '' },
-    { id: uuidv4(), src: '/vaja/vaja-028.jpg', tag: 'Live', span: '' },
-    { id: uuidv4(), src: '/vaja/vaja-063.jpg', tag: 'Performance', span: '' },
+    // Oldest first — the last item gets the newest createdAt so it appears first on the site.
+    { id: uuidv4(), src: '/gallery/g1.jpg', tag: 'Ride or Die (Prime)', caption: 'Ride or Die — Prime Original' },
+    { id: uuidv4(), src: '/gallery/g2.jpg', tag: 'Featured Voices', caption: 'The Voice of KJ Apa, Jonas Bloquet & Devraj' },
+    { id: uuidv4(), src: '/gallery/g3.jpg', tag: 'Dubbing Portfolio', caption: 'Bandish Bandits • The Life List • Fallout & more' },
+    { id: uuidv4(), src: '/gallery/g4.jpg', tag: 'Streaming Originals', caption: 'Aspirants • Dil Dosti Dilemma • The Railway Men' },
+    { id: uuidv4(), src: '/gallery/g5.jpg', tag: 'The Voice of Vaja', caption: 'A signature voice across worlds — The Voice of Vaja' },
   ],
   testimonials: [
     { id: uuidv4(), name: 'Suresh Kumar', role: 'Event Curator, Music Academy Chennai', text: 'Vaja’s command over multiple languages and his sense of stage-craft makes him a rare artist to book. His Crescendo performance stayed with the audience long after the lights went down.', stars: 5 },
@@ -152,7 +150,7 @@ async function getContent(db) {
     db.collection('timeline').find({}, { projection: { _id: 0 } }).sort({ order: 1 }).toArray(),
     db.collection('songs').find({}, { projection: { _id: 0 } }).toArray(),
     db.collection('voiceProjects').find({}, { projection: { _id: 0 } }).toArray(),
-    db.collection('gallery').find({}, { projection: { _id: 0 } }).toArray(),
+    db.collection('gallery').find({}, { projection: { _id: 0 } }).sort({ createdAt: -1, _id: -1 }).toArray(),
     db.collection('testimonials').find({}, { projection: { _id: 0 } }).toArray(),
     db.collection('collaborators').find({}, { projection: { _id: 0 } }).toArray(),
     db.collection('collabHighlights').find({}, { projection: { _id: 0 } }).toArray(),
@@ -291,13 +289,16 @@ async function handler(request, ctx) {
       const id = parts[1]
 
       if (method === 'GET' && !id) {
-        const items = await col.find({}, { projection: { _id: 0 } }).sort({ order: 1, _id: 1 }).toArray()
+        const sortSpec = parts[0] === 'gallery'
+          ? { createdAt: -1, _id: -1 }
+          : { order: 1, _id: 1 }
+        const items = await col.find({}, { projection: { _id: 0 } }).sort(sortSpec).toArray()
         return json({ items })
       }
       if (method === 'POST' && !id) {
         if (!isAdmin(request)) return json({ error: 'Unauthorized' }, { status: 401 })
         const body = await request.json()
-        const doc = { id: uuidv4(), ...body }
+        const doc = { id: uuidv4(), createdAt: new Date().toISOString(), ...body }
         await col.insertOne(doc)
         const clean = { ...doc }; delete clean._id
         return json({ success: true, item: clean })

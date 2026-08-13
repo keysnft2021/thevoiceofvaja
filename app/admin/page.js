@@ -681,26 +681,26 @@ function Dashboard({ token, logout }) {
             ]}
           />}
           {tab === 'voice' && <CollectionManager
-            title="Voice & Dubbing" subtitle="Portfolio of voice projects."
+            title="Voice & Dubbing" subtitle="Portfolio of voice projects. Add a link URL — clicking the image on the site opens it in a new tab."
             endpoint="voice-projects" token={token}
-            emptyItem={{ title: '', category: '', language: '', desc: '', image: '', audioUrl: '' }}
+            emptyItem={{ title: '', category: '', language: '', desc: '', image: '', linkUrl: '' }}
             fields={[
               { key: 'title', label: 'Project Title' },
               { key: 'category', label: 'Category', type: 'select', options: ['Corporate', 'Character', 'Commercial', 'Dubbing', 'Movie', 'Advertisement'] },
               { key: 'language', label: 'Language' },
               { key: 'desc', label: 'Description', type: 'textarea', full: true },
               { key: 'image', label: 'Poster / Image', type: 'media', full: true },
-              { key: 'audioUrl', label: 'Audio Sample URL (mp3)', full: true },
+              { key: 'linkUrl', label: 'Link URL (opens in new tab when image is clicked)', full: true },
             ]}
           />}
           {tab === 'gallery' && <CollectionManager
-            title="Gallery" subtitle="Photos from concerts, studio, portraits."
+            title="Gallery" subtitle="Slider images. The most recently added image appears first on the site."
             endpoint="gallery" token={token}
-            emptyItem={{ src: '', tag: '', span: '' }}
+            emptyItem={{ src: '', tag: '', caption: '' }}
             fields={[
               { key: 'src', label: 'Image', type: 'media', full: true },
-              { key: 'tag', label: 'Tag (Live, Studio, Portrait…)' },
-              { key: 'span', label: 'Grid Span', type: 'select', options: ['', 'col-span-2', 'row-span-2'] },
+              { key: 'caption', label: 'Caption (shown on slide)', full: true },
+              { key: 'tag', label: 'Tag (short label)' },
             ]}
           />}
           {tab === 'collabs' && <CollectionManager

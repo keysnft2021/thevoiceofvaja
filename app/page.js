@@ -416,26 +416,15 @@ function MusicSection({ songs }) {
 // ------------- VOICE -------------
 function Voice({ projects }) {
   const [active, setActive] = useState(0)
-  const audioRef = useRef(null)
-  const [isPlaying, setIsPlaying] = useState(false)
-  const iconMap = { Radio, Film, Volume2, Headphones, Mic2 }
   const current = projects[active] || projects[0]
-  const IconComp = iconMap[current?.icon] || Radio
 
-  const togglePlay = () => {
-    if (!current?.audioUrl) { toast.info('Sample coming soon'); return }
-    if (isPlaying) { audioRef.current?.pause(); setIsPlaying(false) }
-    else {
-      if (audioRef.current) {
-        audioRef.current.src = current.audioUrl
-        audioRef.current.play().then(() => setIsPlaying(true)).catch(() => setIsPlaying(false))
-      }
-    }
+  const openLink = (url) => {
+    if (!url) { toast.info('Link coming soon'); return }
+    window.open(url, '_blank', 'noopener,noreferrer')
   }
 
   return (
     <section id="voice" className="relative section-pad bg-navy text-ivory overflow-hidden">
-      <audio ref={audioRef} onEnded={() => setIsPlaying(false)} />
       <div className="absolute inset-0 opacity-10"><div className="absolute top-0 left-1/3 w-[600px] h-[600px] rounded-full bg-gold blur-[120px]" /></div>
       <div className="relative mx-auto max-w-7xl px-6">
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-12 reveal">
@@ -445,45 +434,67 @@ function Voice({ projects }) {
           </div>
           <p className="max-w-md text-beige/70">From cinematic character voices to multilingual TVCs, Vaja delivers with a warmth and speed that production houses rely on. Studios: Chennai + remote-ready worldwide.</p>
         </div>
+
         {current && (
           <div className="mb-14 reveal rounded-3xl border border-gold/20 bg-navy-soft/80 backdrop-blur p-6 md:p-8 grid md:grid-cols-12 gap-6 items-center">
             <div className="md:col-span-5">
-              <div className="aspect-video rounded-2xl overflow-hidden relative">
-                <img src={current.image} alt="" className="w-full h-full object-cover" />
+              <button
+                onClick={() => openLink(current.linkUrl)}
+                className={`group block w-full aspect-video rounded-2xl overflow-hidden relative ${current.linkUrl ? 'cursor-pointer' : 'cursor-default'}`}
+                aria-label={current.linkUrl ? `Open ${current.title} in a new tab` : current.title}
+              >
+                <img src={current.image} alt={current.title} className="w-full h-full object-cover transition-transform duration-[900ms] group-hover:scale-105" />
                 <div className="absolute inset-0 bg-gradient-to-t from-navy/80 to-navy/10" />
-              </div>
+                {current.linkUrl && (
+                  <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <span className="inline-flex items-center gap-2 rounded-full bg-gold text-navy px-5 py-2.5 text-xs font-medium tracking-widest uppercase shadow-xl">
+                      Visit Project <ArrowUpRight className="w-4 h-4" />
+                    </span>
+                  </div>
+                )}
+              </button>
             </div>
             <div className="md:col-span-7">
               <div className="text-xs tracking-[0.3em] uppercase text-gold mb-2">{current.category} · {current.language}</div>
               <h3 className="font-serif text-3xl md:text-4xl">{current.title}</h3>
               <p className="mt-3 text-beige/70 max-w-xl">{current.desc}</p>
-              <div className="mt-6 flex items-center gap-4">
-                <button onClick={togglePlay} className="w-14 h-14 rounded-full bg-gold text-navy flex items-center justify-center hover:scale-105 transition-transform">
-                  {isPlaying ? <Pause className="w-6 h-6" /> : <Play className="w-6 h-6 ml-0.5" />}
-                </button>
-                <div className="flex-1">
-                  <Waveform playing={isPlaying} />
-                  <div className="mt-2 flex justify-between text-[10px] tracking-widest uppercase text-beige/50"><span>00:00</span><span>02:14</span></div>
-                </div>
-              </div>
+              {current.linkUrl && (
+                <a href={current.linkUrl} target="_blank" rel="noopener noreferrer"
+                   className="mt-6 inline-flex items-center gap-2 rounded-full bg-gold text-navy px-5 py-2.5 text-sm font-medium hover:opacity-90">
+                  Open project <ArrowUpRight className="w-4 h-4" />
+                </a>
+              )}
             </div>
           </div>
         )}
+
         <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {projects.map((p, i) => (
-            <motion.button key={p.id} onClick={() => { setActive(i); setIsPlaying(false) }} whileHover={{ y: -4 }}
-              className={`text-left rounded-2xl overflow-hidden border transition-all ${active === i ? 'border-gold bg-gold/5' : 'border-gold/15 bg-navy-soft/40 hover:border-gold/40'}`}>
-              <div className="aspect-[16/10] relative overflow-hidden">
-                <img src={p.image} alt="" className="w-full h-full object-cover opacity-70" />
-                <div className="absolute inset-0 bg-gradient-to-t from-navy via-navy/50 to-transparent" />
-                <div className="absolute top-3 left-3 w-9 h-9 rounded-full bg-gold text-navy flex items-center justify-center"><Radio className="w-4 h-4" /></div>
-              </div>
-              <div className="p-4">
+          {projects.map((p, idx) => (
+            <motion.div key={p.id} whileHover={{ y: -4 }}
+              className={`text-left rounded-2xl overflow-hidden border transition-all ${active === idx ? 'border-gold bg-gold/5' : 'border-gold/15 bg-navy-soft/40 hover:border-gold/40'}`}
+            >
+              <button
+                onClick={() => openLink(p.linkUrl)}
+                className={`block w-full aspect-[16/10] relative overflow-hidden group ${p.linkUrl ? 'cursor-pointer' : 'cursor-default'}`}
+                aria-label={p.linkUrl ? `Open ${p.title} in a new tab` : p.title}
+              >
+                <img src={p.image} alt={p.title} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-105 transition-all duration-[900ms]" />
+                <div className="absolute inset-0 bg-gradient-to-t from-navy via-navy/40 to-transparent" />
+                <div className="absolute top-3 left-3 w-9 h-9 rounded-full bg-gold text-navy flex items-center justify-center">
+                  <Radio className="w-4 h-4" />
+                </div>
+                {p.linkUrl && (
+                  <div className="absolute top-3 right-3 w-9 h-9 rounded-full bg-ivory/95 text-navy flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity shadow-lg">
+                    <ArrowUpRight className="w-4 h-4" />
+                  </div>
+                )}
+              </button>
+              <button onClick={() => setActive(idx)} className="w-full p-4 text-left hover:bg-gold/5 transition-colors">
                 <div className="text-[10px] tracking-widest uppercase text-gold">{p.category} · {p.language}</div>
                 <h4 className="font-serif text-lg mt-1">{p.title}</h4>
                 <p className="text-xs text-beige/60 mt-1 line-clamp-2">{p.desc}</p>
-              </div>
-            </motion.button>
+              </button>
+            </motion.div>
           ))}
         </div>
       </div>
@@ -491,34 +502,206 @@ function Voice({ projects }) {
   )
 }
 
-// ------------- GALLERY -------------
+// ------------- GALLERY (Auto-playing slider) -------------
 function Gallery({ items }) {
-  const [lightbox, setLightbox] = useState(null)
+  const [i, setI] = useState(0)
+  const [dir, setDir] = useState(1)
+  const [paused, setPaused] = useState(false)
+  const [lightbox, setLightbox] = useState(false)
+  const total = items.length
+  const INTERVAL = 5500
+
+  const go = (n) => {
+    const next = ((n % total) + total) % total
+    setDir(next > i || (i === total - 1 && next === 0) ? 1 : -1)
+    setI(next)
+  }
+
+  useEffect(() => {
+    if (paused || total < 2) return
+    const t = setInterval(() => { setDir(1); setI((v) => (v + 1) % total) }, INTERVAL)
+    return () => clearInterval(t)
+  }, [paused, total])
+
+  useEffect(() => { if (i >= total) setI(0) }, [total, i])
+
+  if (total === 0) {
+    return (
+      <section id="gallery" className="section-pad bg-ivory">
+        <div className="mx-auto max-w-7xl px-6 text-center">
+          <div className="text-xs tracking-[0.35em] uppercase text-gold mb-3">Gallery</div>
+          <h2 className="font-serif text-4xl md:text-5xl text-navy">The story <span className="italic text-gold-grad">unfolds soon</span>.</h2>
+          <p className="mt-3 text-navy/60 text-sm">Add images from the admin panel to populate the slider.</p>
+        </div>
+      </section>
+    )
+  }
+
+  const current = items[i]
+  const variants = {
+    enter: (d) => ({ opacity: 0, x: d > 0 ? 60 : -60 }),
+    center: { opacity: 1, x: 0 },
+    exit: (d) => ({ opacity: 0, x: d > 0 ? -60 : 60 }),
+  }
+
   return (
-    <section id="gallery" className="section-pad bg-ivory">
-      <div className="mx-auto max-w-7xl px-6">
-        <div className="flex items-end justify-between mb-10 reveal">
+    <section id="gallery" className="section-pad bg-ivory relative overflow-hidden">
+      {/* Aura backdrops */}
+      <div className="pointer-events-none absolute inset-0">
+        <div className="absolute -top-40 -left-40 w-[500px] h-[500px] rounded-full opacity-40"
+             style={{ background: 'radial-gradient(circle, rgba(228,206,138,0.35), transparent 60%)' }} />
+        <div className="absolute -bottom-40 -right-40 w-[500px] h-[500px] rounded-full opacity-30"
+             style={{ background: 'radial-gradient(circle, rgba(14,27,51,0.15), transparent 60%)' }} />
+      </div>
+
+      <div className="relative mx-auto max-w-7xl px-6">
+        <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-8 reveal">
           <div>
             <div className="text-xs tracking-[0.35em] uppercase text-gold mb-3">Gallery</div>
-            <h2 className="font-serif text-4xl md:text-5xl text-navy">Frames from the <span className="italic text-gold-grad">journey</span>.</h2>
+            <h2 className="font-serif text-4xl md:text-5xl text-navy leading-tight">
+              Frames from the <span className="italic text-gold-grad">journey</span>.
+            </h2>
+            <p className="mt-3 text-sm text-navy/60 max-w-md">A curated auto-playing slideshow. Latest additions appear first.</p>
+          </div>
+          <div className="flex items-center gap-3">
+            <div className="text-xs tracking-widest uppercase text-navy/50 tabular-nums">
+              {String(i + 1).padStart(2, '0')} <span className="text-navy/30">/ {String(total).padStart(2, '0')}</span>
+            </div>
+            <button onClick={() => setPaused((p) => !p)}
+                    className="w-10 h-10 rounded-full border border-beige-2 bg-white flex items-center justify-center text-navy hover:border-navy transition-colors"
+                    aria-label={paused ? 'Play' : 'Pause'}>
+              {paused ? <Play className="w-4 h-4 ml-0.5" /> : <Pause className="w-4 h-4" />}
+            </button>
           </div>
         </div>
-        <div className="grid grid-cols-2 md:grid-cols-4 auto-rows-[180px] md:auto-rows-[220px] gap-3 md:gap-4">
-          {items.map((g) => (
-            <motion.button key={g.id} onClick={() => setLightbox(g)} whileHover={{ scale: 1.01 }}
-              className={`relative rounded-2xl overflow-hidden group ${g.span || ''}`}>
-              <img src={g.src} alt={g.tag} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-[1400ms]" />
-              <div className="absolute inset-0 bg-gradient-to-t from-navy/70 via-transparent to-transparent" />
-              <div className="absolute bottom-3 left-3 text-[10px] tracking-widest uppercase text-ivory bg-navy/60 backdrop-blur px-2 py-1 rounded-full">{g.tag}</div>
-            </motion.button>
-          ))}
+
+        {/* Slider stage */}
+        <div className="relative reveal"
+             onMouseEnter={() => setPaused(true)}
+             onMouseLeave={() => setPaused(false)}>
+          {/* Frame — fixed viewport height, image fits inside (no crop, no skew) */}
+          <div className="relative rounded-3xl overflow-hidden border border-beige-2 shadow-[0_40px_80px_-30px_rgba(14,27,51,0.35)]
+                          h-[260px] sm:h-[360px] md:h-[480px] lg:h-[540px]"
+               style={{ background: 'linear-gradient(135deg, #F1EADA 0%, #FBF9F5 50%, #E7DDC6 100%)' }}>
+            {/* Soft radial spotlight */}
+            <div className="absolute inset-0 pointer-events-none"
+                 style={{ background: 'radial-gradient(ellipse at center, rgba(255,255,255,0.7) 0%, rgba(255,255,255,0) 60%)' }} />
+
+            {/* Slides — object-contain preserves natural aspect for every image */}
+            <div className="absolute inset-0 flex items-center justify-center p-4 md:p-8">
+              <AnimatePresence mode="wait" custom={dir}>
+                <motion.img
+                  key={current.id}
+                  src={current.src}
+                  alt={current.tag || current.caption || 'Gallery image'}
+                  custom={dir}
+                  variants={variants}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
+                  transition={{ duration: 0.85, ease: [0.16, 1, 0.3, 1] }}
+                  className="max-w-full max-h-full object-contain rounded-xl shadow-[0_20px_50px_-20px_rgba(14,27,51,0.4)] cursor-zoom-in"
+                  style={{ willChange: 'transform, opacity' }}
+                  onClick={() => setLightbox(true)}
+                />
+              </AnimatePresence>
+            </div>
+
+            {/* Arrows */}
+            {total > 1 && (
+              <>
+                <button onClick={() => go(i - 1)} aria-label="Previous"
+                        className="absolute left-3 md:left-5 top-1/2 -translate-y-1/2 z-20 w-10 h-10 md:w-12 md:h-12 rounded-full bg-ivory/90 backdrop-blur border border-beige-2 flex items-center justify-center text-navy hover:bg-white hover:scale-105 transition-all shadow-lg">
+                  <ArrowRight className="w-4 h-4 rotate-180" />
+                </button>
+                <button onClick={() => go(i + 1)} aria-label="Next"
+                        className="absolute right-3 md:right-5 top-1/2 -translate-y-1/2 z-20 w-10 h-10 md:w-12 md:h-12 rounded-full bg-ivory/90 backdrop-blur border border-beige-2 flex items-center justify-center text-navy hover:bg-white hover:scale-105 transition-all shadow-lg">
+                  <ArrowRight className="w-4 h-4" />
+                </button>
+              </>
+            )}
+
+            {/* Progress bar */}
+            {total > 1 && (
+              <div className="absolute inset-x-0 bottom-0 h-[3px] bg-navy/10 z-10">
+                <motion.div
+                  key={current.id + '-bar-' + (paused ? 'p' : 'r')}
+                  className="h-full bg-gold"
+                  initial={{ width: '0%' }}
+                  animate={{ width: paused ? '0%' : '100%' }}
+                  transition={{ duration: paused ? 0 : INTERVAL / 1000, ease: 'linear' }}
+                />
+              </div>
+            )}
+          </div>
+
+          {/* Caption + dots row (below the frame, no overlap on strip images) */}
+          <div className="mt-5 flex flex-col md:flex-row items-start md:items-center justify-between gap-3">
+            <div className="min-w-0 flex-1">
+              <AnimatePresence mode="wait">
+                <motion.div key={current.id + '-cap'}
+                            initial={{ opacity: 0, y: 8 }}
+                            animate={{ opacity: 1, y: 0 }}
+                            exit={{ opacity: 0, y: -6 }}
+                            transition={{ duration: 0.45 }}>
+                  <div className="inline-flex items-center gap-2 text-[10px] tracking-[0.3em] uppercase text-gold">
+                    <span className="h-px w-6 bg-gold" /> {current.tag || 'Gallery'}
+                  </div>
+                  <div className="mt-1 font-serif text-xl md:text-2xl text-navy truncate">
+                    {current.caption || current.tag || 'Untitled'}
+                  </div>
+                </motion.div>
+              </AnimatePresence>
+            </div>
+            {total > 1 && (
+              <div className="flex items-center gap-1.5 shrink-0">
+                {items.map((_, k) => (
+                  <button key={k} onClick={() => go(k)} aria-label={`Slide ${k + 1}`}
+                          className={`h-1.5 rounded-full transition-all ${k === i ? 'w-8 bg-navy' : 'w-2 bg-navy/25 hover:bg-navy/50'}`} />
+                ))}
+              </div>
+            )}
+          </div>
+
+          {/* Thumbnail rail — uniform 16:9 tiles so it never skews */}
+          {total > 1 && (
+            <div className="mt-5 flex gap-3 overflow-x-auto no-scrollbar pb-2 -mx-2 px-2">
+              {items.map((g, k) => (
+                <button
+                  key={g.id}
+                  onClick={() => go(k)}
+                  aria-label={`Show slide ${k + 1}`}
+                  className={`relative shrink-0 rounded-lg overflow-hidden transition-all bg-beige/60 ${
+                    k === i
+                      ? 'ring-2 ring-gold ring-offset-2 ring-offset-ivory'
+                      : 'ring-1 ring-beige-2 hover:ring-navy/40 opacity-70 hover:opacity-100'
+                  }`}
+                  style={{ width: 128, height: 72 }}
+                >
+                  <img src={g.src} alt="" className="w-full h-full object-contain" />
+                  {k !== i ? <div className="absolute inset-0 bg-navy/5" /> : null}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
       </div>
+
+      {/* Lightbox */}
       <AnimatePresence>
         {lightbox && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} className="fixed inset-0 z-[80] bg-navy/90 backdrop-blur-sm flex items-center justify-center p-6" onClick={() => setLightbox(null)}>
-            <button className="absolute top-6 right-6 text-ivory" onClick={() => setLightbox(null)}><X className="w-6 h-6" /></button>
-            <motion.img initial={{ scale: 0.9 }} animate={{ scale: 1 }} src={lightbox.src} alt={lightbox.tag} className="max-h-[85vh] max-w-[90vw] rounded-2xl object-contain" />
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                      className="fixed inset-0 z-[80] bg-navy/95 backdrop-blur-sm flex items-center justify-center p-6"
+                      onClick={() => setLightbox(false)}>
+            <button className="absolute top-6 right-6 text-ivory" onClick={() => setLightbox(false)}>
+              <X className="w-6 h-6" />
+            </button>
+            <motion.img initial={{ scale: 0.95, opacity: 0 }} animate={{ scale: 1, opacity: 1 }}
+                        src={current.src} alt={current.tag || ''}
+                        className="max-h-[85vh] max-w-[92vw] rounded-2xl object-contain shadow-2xl" />
+            <div className="absolute bottom-6 left-1/2 -translate-x-1/2 text-ivory/80 text-sm tracking-widest uppercase">
+              {current.caption || current.tag || ''}
+            </div>
           </motion.div>
         )}
       </AnimatePresence>
