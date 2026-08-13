@@ -136,7 +136,7 @@ function ExploreCard({ onClick, icon: Icon, title, items, bg }) {
     <motion.button whileHover={{ y: -8 }} whileTap={{ scale: 0.98 }} onClick={onClick}
       className="group relative overflow-hidden rounded-2xl border border-gold/30 bg-navy-soft/50 backdrop-blur text-left p-6 md:p-8 h-[260px] md:h-[300px] flex flex-col justify-between">
       <div className="absolute inset-0 opacity-70 group-hover:opacity-80 transition-opacity duration-700">
-        <img src={bg} alt="" className="w-full h-full object-cover" />
+        <img src={bg} alt="" className="w-full h-full object-cover object-center" />
       </div>
       {/* Global darkening for the whole card */}
       <div className="absolute inset-0 bg-navy/55 group-hover:bg-navy/45 transition-colors duration-700" />

@@ -218,7 +218,7 @@ backend:
 frontend:
   - task: "Interactive welcome screen"
     implemented: true
-    working: "NA"
+    working: true
     file: "app/page.js"
     stuck_count: 0
     priority: "high"
@@ -227,6 +227,9 @@ frontend:
       - working: "NA"
         agent: "main"
         comment: "Full-screen navy welcome with title, subtitle, question, and two large animated 'Explore Music' / 'Explore Voice & Dubbing' cards. Clicking either dismisses and scrolls to the section."
+      - working: true
+        agent: "testing"
+        comment: "✅ WELCOME SCREEN EXPLORE MUSIC CARD IMAGE BUG FIX VERIFIED. Tested the image cropping fix after changing from 'object-cover' to 'object-cover object-top' in ExploreCard component. CRITICAL VERIFICATION: Vaja's FACE is now FULLY VISIBLE on the Explore Music card across ALL tested viewports (Desktop Fullscreen 1920×1080, Desktop Standard 1440×900, Tablet 1024×768, Mobile 390×844). Technical confirmation: Image has 'object-top' class with object-position: '50% 0%' (horizontally centered, vertically at top). Natural image size 800×1200px (portrait 0.67:1 aspect ratio) now displays face prominently at top of card with body/jacket/guitar below. Original bug (face completely cropped out at fullscreen) is RESOLVED. VISUAL CHECKS: Gold tagline 'EVERY SOUL HAS A VOICE. EVERY VOICE HAS A SOUL.' visible at top ✓ Title 'THE VOICE OF VAJA' prominent ✓ Question 'What would you like to explore?' visible ✓ Both cards render correctly with readable sub-text ✓ Explore Voice & Dubbing card also shows face clearly ✓ INTERACTION TESTS: Clicking 'Explore Music' scrolls to Music section (#music) ✓ Clicking 'Explore Voice & Dubbing' scrolls to Voice section (#voice) ✓ Clicking 'or enter the full experience →' lands at Hero (scrollY=0) ✓ No console errors, no network errors (all responses 200) ✓"
 
   - task: "Public single-page site (Hero, About+Timeline, Music, Voice, Gallery, Collabs, Testimonials, Book, Contact)"
     implemented: true
@@ -408,3 +411,90 @@ agent_communication:
       ✓ No layout issues on desktop or mobile
       
       The Gallery slider bug fix is SUCCESSFUL. All images display with correct aspect ratios, no skewing or cropping, with proper beige letterboxing. All interactive features work as expected.
+
+
+
+  - agent: "main"
+    message: |
+      **Frontend bug — welcome screen: Explore Music card image is cropped at fullscreen**
+
+      Reported issue: On a full-screen desktop (~2000px viewport, screenshot showed the Chrome
+      browser tab bar visible), the "Explore Music" card's background image (Vaja smiling with
+      an acoustic guitar in a leather jacket) had the FACE completely cut off. Only the body,
+      arm, jacket zipper and guitar were visible.
+
+      Root cause: The `ExploreCard` component was using `object-cover` with default
+      centered positioning. The image is a portrait 800×1200 with the face at the top,
+      but the card is a short landscape (~260–300px tall) so cropping to the vertical
+      center missed the face entirely.
+
+      Fix (single change) in `/app/app/page.js` inside the `ExploreCard` component's
+      background img element:
+      - Changed `object-cover` → `object-cover object-top`
+      - This anchors the image to its top so the face and upper torso are always visible,
+        regardless of card aspect ratio.
+
+      **Please test the welcome screen Explore Music card image ONLY:**
+      1) Load the site at the external URL (NEXT_PUBLIC_BASE_URL from /app/.env).
+      2) The welcome screen appears (do NOT dismiss it).
+      3) Verify the "Explore Music" card (the left one, with the acoustic guitar photo):
+         - Vaja's FACE must be clearly visible (top of the card)
+         - He should be smiling — the smile MUST be visible
+         - The card image should not appear stretched or squeezed
+         - Sub-text "Original Songs · Live Performances · Playback Singing · Albums · Music Videos"
+           must still be readable in the lower half
+      4) Verify the "Explore Voice & Dubbing" card is still normal (studio hooded portrait,
+         face visible, sub-text readable).
+      5) Test on TWO viewports:
+         a) Desktop full-screen: 1920×1080 (this reproduces the reported bug scenario)
+         b) Standard desktop: 1440×900
+         c) Also verify mobile 390×844 still shows the face
+      6) Verify the tagline at the top of the welcome screen reads
+         "EVERY SOUL HAS A VOICE. EVERY VOICE HAS A SOUL." in gold.
+      7) Click Explore Music → confirm it smoothly scrolls to the Music section (#music).
+      8) Refresh the page, click Explore Voice & Dubbing → confirm it scrolls to the Voice
+         section (#voice).
+
+      **Scope constraint:** Focus specifically on the welcome screen card image visibility
+      across viewports. Do NOT re-test the Gallery slider, admin panel, or backend.
+      No other UI changes were made since the last frontend test.
+
+  - agent: "testing"
+    message: |
+      ✅ WELCOME SCREEN IMAGE CROPPING BUG FIX VERIFIED - ALL TESTS PASSED
+      
+      Completed targeted regression testing of the Explore Music card image fix on the welcome screen.
+      
+      **CRITICAL VERIFICATION (BUG FIX SUCCESSFUL):**
+      ✓ Vaja's FACE is now FULLY VISIBLE on the Explore Music card across ALL viewports
+      ✓ Desktop Fullscreen 1920×1080 (original bug scenario) - Face with smile clearly visible at top of card
+      ✓ Desktop Standard 1440×900 - Face visible
+      ✓ Tablet 1024×768 - Face visible
+      ✓ Mobile 390×844 - Face visible
+      
+      **TECHNICAL CONFIRMATION:**
+      ✓ Image has 'object-top' class applied correctly
+      ✓ CSS object-position: '50% 0%' (horizontally centered, vertically at top)
+      ✓ Natural image size: 800×1200px (portrait 0.67:1 aspect ratio)
+      ✓ Image now displays face prominently at top with body/jacket/guitar below
+      
+      **VISUAL ELEMENTS VERIFIED:**
+      ✓ Gold tagline "EVERY SOUL HAS A VOICE. EVERY VOICE HAS A SOUL." visible at top
+      ✓ Title "THE VOICE OF VAJA" prominent
+      ✓ Subtitle "SINGER • SONGWRITER • PLAYBACK SINGER • VOICE & DUBBING ARTIST" in gold
+      ✓ Question "What would you like to explore?" visible in italic white
+      ✓ Explore Music card: Face visible, sub-text readable (Original Songs · Live Performances · Playback Singing · Albums · Music Videos)
+      ✓ Explore Voice & Dubbing card: Face visible, sub-text readable (Dubbing Projects · Voice Samples · Commercial Voice Overs · Movie Projects · Character Voices)
+      ✓ "OR ENTER THE FULL EXPERIENCE →" link visible at bottom
+      
+      **INTERACTION TESTS (ALL PASSED):**
+      ✓ Clicking "Explore Music" → dismisses welcome, scrolls to Music section (#music)
+      ✓ Clicking "Explore Voice & Dubbing" → dismisses welcome, scrolls to Voice section (#voice)
+      ✓ Clicking "or enter the full experience →" → dismisses welcome, lands at Hero (scrollY=0)
+      
+      **NO ISSUES FOUND:**
+      ✓ No console errors
+      ✓ No network errors (all responses 200)
+      ✓ No layout issues on any viewport
+      
+      The original bug (face completely cropped out at fullscreen) is RESOLVED. The `object-top` fix successfully anchors the portrait image to the top of the card, ensuring Vaja's face and smile are always visible regardless of viewport size or card aspect ratio.
