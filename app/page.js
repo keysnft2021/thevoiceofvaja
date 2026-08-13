@@ -94,8 +94,8 @@ function WelcomeScreen({ onEnter, welcome }) {
         style={{ background: 'radial-gradient(circle, rgba(228,206,138,0.35), transparent 60%)' }} />
       <div className="relative z-10 h-full flex flex-col">
         <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="pt-6 md:pt-8 text-center">
-          <span className="inline-flex items-center gap-2 text-[10px] md:text-xs tracking-[0.3em] text-gold uppercase">
-            <span className="h-px w-8 bg-gold" /> Official Welcome <span className="h-px w-8 bg-gold" />
+          <span className="inline-flex items-center gap-2 text-[10px] md:text-xs tracking-[0.3em] text-gold uppercase text-center">
+            <span className="h-px w-6 md:w-8 bg-gold" /> Every soul has a voice. Every voice has a soul. <span className="h-px w-6 md:w-8 bg-gold" />
           </span>
         </motion.div>
         <div className="flex-1 flex flex-col items-center justify-center px-6 text-center py-8">
@@ -115,7 +115,7 @@ function WelcomeScreen({ onEnter, welcome }) {
             className="mt-8 grid grid-cols-1 md:grid-cols-2 gap-4 md:gap-6 w-full max-w-4xl">
             <ExploreCard onClick={() => onEnter('music')} icon={Music2} title="Explore Music"
               items={['Original Songs', 'Live Performances', 'Playback Singing', 'Albums', 'Music Videos', 'Collaborations']}
-              bg="/vaja/vaja-021.jpg" />
+              bg="/vaja/vaja-explore-music.jpg" />
             <ExploreCard onClick={() => onEnter('voice')} icon={Mic2} title="Explore Voice & Dubbing"
               items={['Dubbing Projects', 'Voice Samples', 'Commercial Voice Overs', 'Movie Projects', 'Character Voices', 'Corporate']}
               bg="/vaja/vaja-027.jpg" />
@@ -1138,10 +1138,16 @@ function App() {
     return () => window.removeEventListener('scroll', onScroll)
   }, [])
 
-  function enter(_target) {
+  function enter(target) {
     setEntered(true)
-    // Stay at hero — do not auto-scroll; user can navigate via menu.
-    window.scrollTo({ top: 0, behavior: 'instant' })
+    // Wait for welcome to unmount, then smooth-scroll to the requested section.
+    const sectionId = target === 'music' ? 'music' : target === 'voice' ? 'voice' : 'home'
+    setTimeout(() => {
+      const el = document.getElementById(sectionId)
+      if (!el) return window.scrollTo({ top: 0, behavior: 'smooth' })
+      const y = sectionId === 'home' ? 0 : (el.getBoundingClientRect().top + window.scrollY - 88)
+      window.scrollTo({ top: y, behavior: 'smooth' })
+    }, 700)
   }
 
   if (!content) return <Loader />
