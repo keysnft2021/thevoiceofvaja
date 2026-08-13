@@ -230,6 +230,9 @@ frontend:
       - working: true
         agent: "testing"
         comment: "✅ WELCOME SCREEN EXPLORE MUSIC CARD IMAGE BUG FIX VERIFIED. Tested the image cropping fix after changing from 'object-cover' to 'object-cover object-top' in ExploreCard component. CRITICAL VERIFICATION: Vaja's FACE is now FULLY VISIBLE on the Explore Music card across ALL tested viewports (Desktop Fullscreen 1920×1080, Desktop Standard 1440×900, Tablet 1024×768, Mobile 390×844). Technical confirmation: Image has 'object-top' class with object-position: '50% 0%' (horizontally centered, vertically at top). Natural image size 800×1200px (portrait 0.67:1 aspect ratio) now displays face prominently at top of card with body/jacket/guitar below. Original bug (face completely cropped out at fullscreen) is RESOLVED. VISUAL CHECKS: Gold tagline 'EVERY SOUL HAS A VOICE. EVERY VOICE HAS A SOUL.' visible at top ✓ Title 'THE VOICE OF VAJA' prominent ✓ Question 'What would you like to explore?' visible ✓ Both cards render correctly with readable sub-text ✓ Explore Voice & Dubbing card also shows face clearly ✓ INTERACTION TESTS: Clicking 'Explore Music' scrolls to Music section (#music) ✓ Clicking 'Explore Voice & Dubbing' scrolls to Voice section (#voice) ✓ Clicking 'or enter the full experience →' lands at Hero (scrollY=0) ✓ No console errors, no network errors (all responses 200) ✓"
+      - working: true
+        agent: "testing"
+        comment: "✅ LOGO CLICK RE-OPENS WELCOME SCREEN BUG FIX VERIFIED - ALL TESTS PASSED. Tested the newly wired 'logo click re-opens Welcome screen' behaviour on desktop (1440×900) and mobile (390×844) viewports. PRIMARY REGRESSION CHECK SUCCESSFUL: (1) Clicking the 'V' logo circle in sticky nav re-opens the Welcome screen with all elements (title, tagline, question, two Explore cards) ✓ (2) Auto-scroll to top happens (scrollY=0) ✓ (3) Clicking 'The Voice Of Vaja' brand text also re-opens Welcome ✓ NAVIGATION FLOW TESTS: Initial load → Welcome renders → Click 'Explore Music' → dismisses and scrolls to Music section (#music, header 'Original songs, playback and live magic' visible) ✓ Click V logo → Welcome re-appears ✓ Click 'Explore Voice & Dubbing' → dismisses and scrolls to Voice section (#voice, dark navy background rgb(14,27,51) confirmed) ✓ Click brand text → Welcome re-appears ✓ Click 'or enter the full experience →' → dismisses and lands at Hero (scrollY=0, heading 'A soulful voice, multi-lingual at heart.' visible) ✓ OTHER NAV LINKS: All nav links (About, Music, Voice & Dubbing, Gallery, Collaborations, Testimonials, Book Vaja) work correctly and smooth-scroll to sections WITHOUT triggering welcome ✓ MOBILE VIEWPORT (390×844): Tapping the 'V' circle logo (brand text hidden on mobile) re-opens Welcome screen ✓ NO ISSUES: No console errors, no visual glitches, no double overlay, no stuck welcome, transitions smooth ✓ The returnToWelcome() function (scrolls to top, 350ms delay, sets entered=false) works perfectly. The logo/brand click behaviour is FULLY FUNCTIONAL."
 
   - task: "Public single-page site (Hero, About+Timeline, Music, Voice, Gallery, Collabs, Testimonials, Book, Contact)"
     implemented: true
@@ -438,6 +441,49 @@ agent_communication:
       1) Load the site at the external URL (NEXT_PUBLIC_BASE_URL from /app/.env).
       2) The welcome screen appears (do NOT dismiss it).
       3) Verify the "Explore Music" card (the left one, with the acoustic guitar photo):
+
+
+  - agent: "main"
+    message: |
+      **Frontend bug fix — clicking the logo/brand in the nav should re-open the Welcome screen**
+
+      Reported issue: In the sticky top nav, clicking the "V" logo circle or the
+      "The Voice Of Vaja" text does nothing (previously just scrolled to home). The user wants
+      it to re-open the interactive Welcome screen so they can pick Music or Voice again.
+
+      Fix (2 changes in `/app/app/page.js`):
+      1) `Nav` component — the brand block (logo + text) now calls a new
+         `onReturnToWelcome` prop instead of scrolling. Added `aria-label` and hover-color
+         feedback on the brand text.
+      2) `App` component — added `returnToWelcome()` which scrolls to top and, after 350ms,
+         sets `entered = false`. Because the Welcome screen is conditionally rendered
+         inside `<AnimatePresence>` based on `entered`, this brings the welcome overlay
+         back with its full animation and dismisses on next Explore choice.
+      3) `<Nav />` is now passed `onReturnToWelcome={returnToWelcome}`.
+
+      **Please test the frontend bug fix ONLY:**
+      1) Load the site → welcome shows → click "Explore Music" → verify page lands at
+         the Music section.
+      2) Once on the site, in the sticky top nav, click the "V" logo circle OR the
+         "The Voice Of Vaja" text — verify the interactive Welcome screen re-appears
+         (with title, tagline "Every soul has a voice. Every voice has a soul.",
+         "What would you like to explore?" question, and the two Explore cards).
+      3) From the re-opened welcome, click "Explore Voice & Dubbing" → verify page
+         smooth-scrolls to the Voice section (`#voice`) with the dark navy background.
+      4) Once again in the sticky nav, click "The Voice Of Vaja" text — welcome
+         re-appears. Click the small "or enter the full experience →" link —
+         welcome dismisses and page lands at the Hero (top, scrollY = 0).
+      5) Repeat step 2 on mobile viewport (390×844) — the mobile nav is a compact
+         pill; tapping the small "V" circle (the brand text is hidden on small
+         screens) should also re-open the Welcome screen.
+      6) Confirm no console errors, no layout shifts, and the sticky nav still works
+         normally (About, Music, Voice & Dubbing, Gallery, etc. links still scroll
+         correctly to their sections).
+
+      **Scope constraint:** Only test the "click logo → welcome returns" behaviour and
+      the follow-up navigation. Do NOT re-test the Gallery slider, Voice link URLs,
+      admin panel, or backend. All were verified in previous runs.
+
          - Vaja's FACE must be clearly visible (top of the card)
          - He should be smiling — the smile MUST be visible
          - The card image should not appear stretched or squeezed
@@ -458,6 +504,43 @@ agent_communication:
       **Scope constraint:** Focus specifically on the welcome screen card image visibility
       across viewports. Do NOT re-test the Gallery slider, admin panel, or backend.
       No other UI changes were made since the last frontend test.
+  
+  - agent: "testing"
+    message: |
+      ✅ LOGO CLICK RE-OPENS WELCOME SCREEN TEST COMPLETE - ALL TESTS PASSED
+      
+      Completed comprehensive testing of the newly wired "logo click re-opens Welcome screen" behaviour on the public site.
+      
+      **PRIMARY REGRESSION CHECK (SUCCESSFUL):**
+      ✅ Clicking the "V" logo circle in sticky nav re-opens the Welcome screen
+      ✅ Clicking "The Voice Of Vaja" brand text also re-opens the Welcome screen
+      ✅ Auto-scroll to top happens (scrollY=0) when Welcome re-opens
+      ✅ Welcome displays all elements correctly: title, tagline, question, two Explore cards
+      
+      **NAVIGATION FLOW TESTS (ALL PASSED):**
+      ✅ Initial load → Welcome screen renders with all elements
+      ✅ Click "Explore Music" → dismisses welcome, scrolls to Music section (#music)
+      ✅ Click V logo → Welcome re-appears with full animation
+      ✅ Click "Explore Voice & Dubbing" → dismisses, scrolls to Voice section (#voice, dark navy background confirmed)
+      ✅ Click brand text → Welcome re-appears
+      ✅ Click "or enter the full experience →" → dismisses, lands at Hero (scrollY=0)
+      
+      **OTHER NAV LINKS (ALL WORKING):**
+      ✅ About, Music, Voice & Dubbing, Gallery, Collaborations, Testimonials, Book Vaja
+      ✅ All links smooth-scroll to sections WITHOUT triggering welcome
+      
+      **MOBILE VIEWPORT (390×844):**
+      ✅ Tapping "V" circle logo re-opens Welcome screen (brand text hidden on mobile as expected)
+      ✅ All interactions work correctly on mobile
+      
+      **NO ISSUES FOUND:**
+      ✅ No console errors
+      ✅ No visual glitches
+      ✅ No double overlay
+      ✅ No stuck welcome
+      ✅ Smooth transitions
+      
+      The returnToWelcome() function (scrolls to top, 350ms delay, sets entered=false) works perfectly. The logo/brand click behaviour is FULLY FUNCTIONAL across all viewports.
 
   - agent: "testing"
     message: |

@@ -160,18 +160,24 @@ function ExploreCard({ onClick, icon: Icon, title, items, bg }) {
 }
 
 // ------------- NAV -------------
-function Nav({ scrolled }) {
+function Nav({ scrolled, onReturnToWelcome }) {
   const [open, setOpen] = useState(false)
+  const handleLogo = (e) => {
+    e.preventDefault()
+    setOpen(false)
+    if (onReturnToWelcome) onReturnToWelcome()
+  }
   return (
     <>
       <motion.header initial={{ y: -20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ duration: 0.8 }}
         className={`fixed top-0 inset-x-0 z-50 transition-all duration-500 ${scrolled ? 'py-3' : 'py-5'}`}>
         <div className="mx-auto max-w-6xl px-4">
           <div className={`flex items-center justify-between rounded-full px-4 md:px-6 py-3 backdrop-blur-md border transition-all duration-500 ${scrolled ? 'bg-ivory/85 border-beige-2 shadow-[0_10px_40px_-15px_rgba(14,27,51,0.15)]' : 'bg-ivory/70 border-beige-2/60'}`}>
-            <a href="#home" className="flex items-center gap-2 group">
-              <span className="w-8 h-8 rounded-full bg-navy text-gold flex items-center justify-center font-serif text-lg">V</span>
+            <a href="#home" onClick={handleLogo} aria-label="Return to welcome screen"
+               className="flex items-center gap-2 group cursor-pointer">
+              <span className="w-8 h-8 rounded-full bg-navy text-gold flex items-center justify-center font-serif text-lg transition-transform group-hover:scale-105">V</span>
               <span className="hidden sm:flex flex-col leading-none">
-                <span className="font-serif text-navy text-sm tracking-wide">The Voice Of Vaja</span>
+                <span className="font-serif text-navy text-sm tracking-wide group-hover:text-gold transition-colors">The Voice Of Vaja</span>
                 <span className="text-[9px] tracking-[0.3em] text-muted-ink uppercase mt-0.5">Since 2007</span>
               </span>
             </a>
@@ -1157,6 +1163,13 @@ function App() {
     }, 700)
   }
 
+  function returnToWelcome() {
+    // Scroll to top first so when welcome dismisses again, we land nicely.
+    window.scrollTo({ top: 0, behavior: 'smooth' })
+    // Small delay lets the scroll begin, then we overlay the welcome again.
+    setTimeout(() => setEntered(false), 350)
+  }
+
   if (!content) return <Loader />
 
   return (
@@ -1164,7 +1177,7 @@ function App() {
       <AnimatePresence>
         {!entered && <WelcomeScreen key="welcome" onEnter={enter} welcome={content.site.welcome} />}
       </AnimatePresence>
-      <Nav scrolled={scrolled} />
+      <Nav scrolled={scrolled} onReturnToWelcome={returnToWelcome} />
       <Hero hero={content.site.hero} />
       <Stats stats={content.site.stats || []} />
       <About about={content.site.about} timeline={content.timeline} />
