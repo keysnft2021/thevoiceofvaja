@@ -342,29 +342,58 @@ function About({ about, timeline }) {
   )
 }
 
+// Helper: normalise any YouTube URL to /embed/{id}
+function toYouTubeEmbed(url) {
+  if (!url) return null
+  try {
+    const u = new URL(url)
+    if (u.hostname.includes('youtu.be')) return `https://www.youtube.com/embed/${u.pathname.slice(1)}?autoplay=1&rel=0`
+    if (u.hostname.includes('youtube.com')) {
+      if (u.pathname.startsWith('/embed/')) return `${url}${url.includes('?') ? '&' : '?'}autoplay=1&rel=0`
+      const id = u.searchParams.get('v')
+      if (id) return `https://www.youtube.com/embed/${id}?autoplay=1&rel=0`
+    }
+  } catch { /* not a valid URL */ }
+  return null
+}
+
 // ------------- MUSIC -------------
-function MusicSection({ songs }) {
+function MusicSection({ songs, youtubeUrl }) {
   const [filter, setFilter] = useState('All')
   const [playing, setPlaying] = useState(null)
+  const [ytOpen, setYtOpen] = useState(null) // { url, title } | null
   const audioRef = useRef(null)
-  const filters = ['All', 'Original', 'Playback', 'Tribute', 'Anthem', 'Film']
+  const filters = ['All', 'Original', 'Playback', 'Tribute', 'Anthem', 'Film', 'Live']
 
   const filtered = useMemo(() => {
     if (filter === 'All') return songs
-    if (filter === 'Playback') return songs.filter((s) => (s.role || '').includes('Playback'))
+    if (filter === 'Playback') return songs.filter((s) => (s.role || '').includes('Playback') || s.genre === 'Playback')
     return songs.filter((s) => s.genre === filter)
   }, [filter, songs])
 
+  const openYouTube = (song) => {
+    const embed = toYouTubeEmbed(song.videoUrl)
+    if (embed) { setYtOpen({ url: embed, title: song.title }); return true }
+    return false
+  }
+
   const togglePlay = (song) => {
+    // If it's a Live entry OR song has a YouTube videoUrl, open the iframe modal.
+    if (song.genre === 'Live' || (song.videoUrl && song.videoUrl.match(/youtu\.?be/i))) {
+      if (openYouTube(song)) return
+    }
     if (playing === song.title) {
-      audioRef.current?.pause()
-      setPlaying(null)
-    } else {
+      audioRef.current?.pause(); setPlaying(null)
+    } else if (song.audioUrl) {
       setPlaying(song.title)
-      if (song.audioUrl && audioRef.current) {
+      if (audioRef.current) {
         audioRef.current.src = song.audioUrl
         audioRef.current.play().catch(() => {})
       }
+    } else if (song.streamUrl) {
+      window.open(song.streamUrl, '_blank', 'noopener,noreferrer')
+    } else {
+      toast.info('Preview coming soon')
     }
   }
 
@@ -377,51 +406,138 @@ function MusicSection({ songs }) {
             <div className="text-xs tracking-[0.35em] uppercase text-gold mb-3">Music</div>
             <h2 className="font-serif text-4xl md:text-5xl text-navy">Original songs, playback and <span className="italic text-gold-grad">live magic</span>.</h2>
           </div>
-          <div className="flex flex-wrap gap-2">
-            {filters.map((f) => (
-              <button key={f} onClick={() => setFilter(f)}
-                className={`rounded-full px-4 py-2 text-xs tracking-widest uppercase border transition-all ${filter === f ? 'bg-navy text-ivory border-navy' : 'bg-white text-navy border-beige-2 hover:border-navy'}`}>
-                {f}
-              </button>
-            ))}
+          <div className="flex items-center gap-3">
+            {youtubeUrl ? (
+              <a href={youtubeUrl} target="_blank" rel="noopener noreferrer"
+                 className="hidden md:inline-flex items-center gap-2 rounded-full bg-navy text-ivory text-xs px-4 py-2.5 hover:bg-navy-soft transition-colors">
+                <Youtube className="w-4 h-4 text-gold" /> YouTube Channel <ArrowUpRight className="w-3.5 h-3.5" />
+              </a>
+            ) : null}
           </div>
         </div>
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filtered.map((s, i) => (
-            <motion.article key={s.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 0.6, delay: i * 0.05 }}
-              className="group rounded-2xl overflow-hidden bg-white border border-beige-2 shadow-[0_10px_40px_-20px_rgba(14,27,51,0.2)] hover:shadow-[0_30px_60px_-30px_rgba(14,27,51,0.35)] transition-all">
-              <div className="relative aspect-[4/3] overflow-hidden">
-                <img src={s.image} alt={s.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[1200ms]" />
-                <div className="absolute inset-0 bg-gradient-to-t from-navy/70 via-navy/20 to-transparent" />
-                <div className="absolute top-4 left-4"><span className="text-[10px] tracking-widest uppercase bg-gold text-navy px-2.5 py-1 rounded-full">{s.tag}</span></div>
-                <button onClick={() => togglePlay(s)} className="absolute bottom-4 left-4 w-12 h-12 rounded-full bg-ivory text-navy flex items-center justify-center shadow-lg hover:scale-105 transition-transform">
-                  {playing === s.title ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />}
-                </button>
-                <div className="absolute bottom-4 right-4"><Waveform playing={playing === s.title} /></div>
-              </div>
-              <div className="p-5">
-                <div className="flex items-start justify-between gap-3">
-                  <h3 className="font-serif text-xl text-navy leading-tight">{s.title}</h3>
-                  <span className="text-xs text-muted-ink whitespace-nowrap mt-1">{s.year}</span>
-                </div>
-                <div className="text-xs text-gold mt-1 tracking-wide">{s.role}</div>
-                <p className="mt-3 text-sm text-navy/70 leading-relaxed">{s.desc}</p>
-                <div className="mt-4 flex items-center justify-between border-t border-beige-2 pt-3">
-                  <div className="flex items-center gap-3 text-xs text-navy/60">
-                    <span className="inline-flex items-center gap-1"><Globe className="w-3.5 h-3.5" /> {s.language}</span>
-                    <span className="inline-flex items-center gap-1"><Music2 className="w-3.5 h-3.5" /> {s.genre}</span>
-                  </div>
-                  {(s.streamUrl || s.videoUrl) ? (
-                    <a href={s.streamUrl || s.videoUrl} target="_blank" rel="noreferrer" className="text-xs text-navy/70 hover:text-navy inline-flex items-center gap-1 link-sweep">
-                      {s.videoUrl ? 'Watch' : 'Stream'} <ArrowUpRight className="w-3.5 h-3.5" />
-                    </a>
-                  ) : null}
-                </div>
-              </div>
-            </motion.article>
+        <div className="flex flex-wrap gap-2 mb-8 reveal">
+          {filters.map((f) => (
+            <button key={f} onClick={() => setFilter(f)}
+              className={`rounded-full px-4 py-2 text-xs tracking-widest uppercase border transition-all ${filter === f ? 'bg-navy text-ivory border-navy' : 'bg-white text-navy border-beige-2 hover:border-navy'}`}>
+              {f}
+            </button>
           ))}
+          {youtubeUrl ? (
+            <a href={youtubeUrl} target="_blank" rel="noopener noreferrer"
+               className="md:hidden inline-flex items-center gap-1.5 rounded-full bg-navy text-ivory text-xs px-3 py-2">
+              <Youtube className="w-3.5 h-3.5 text-gold" /> YouTube
+            </a>
+          ) : null}
         </div>
+
+        {filtered.length === 0 ? (
+          <div className="text-center py-16 rounded-2xl border border-beige-2 bg-beige/40">
+            <div className="text-sm text-navy/60">
+              {filter === 'Live'
+                ? 'Live performances are being uploaded — check back soon.'
+                : 'No items in this category yet.'}
+            </div>
+          </div>
+        ) : (
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            {filtered.map((s, i) => {
+              const isLive = s.genre === 'Live'
+              const hasYT = !!toYouTubeEmbed(s.videoUrl)
+              return (
+                <motion.article key={s.id} initial={{ opacity: 0, y: 20 }} whileInView={{ opacity: 1, y: 0 }} viewport={{ once: true, amount: 0.2 }} transition={{ duration: 0.6, delay: i * 0.05 }}
+                  className="group rounded-2xl overflow-hidden bg-white border border-beige-2 shadow-[0_10px_40px_-20px_rgba(14,27,51,0.2)] hover:shadow-[0_30px_60px_-30px_rgba(14,27,51,0.35)] transition-all">
+                  <button onClick={() => togglePlay(s)}
+                          className={`relative aspect-[4/3] w-full overflow-hidden text-left ${(isLive || hasYT || s.audioUrl || s.streamUrl) ? 'cursor-pointer' : 'cursor-default'}`}
+                          aria-label={isLive || hasYT ? `Play ${s.title} video` : `Play ${s.title}`}>
+                    <img src={s.image} alt={s.title} className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-[1200ms]" />
+                    <div className="absolute inset-0 bg-gradient-to-t from-navy/70 via-navy/20 to-transparent" />
+                    <div className="absolute top-4 left-4 flex items-center gap-2">
+                      {s.tag ? <span className="text-[10px] tracking-widest uppercase bg-gold text-navy px-2.5 py-1 rounded-full">{s.tag}</span> : null}
+                      {isLive ? (
+                        <span className="inline-flex items-center gap-1 text-[10px] tracking-widest uppercase bg-red-600 text-white px-2.5 py-1 rounded-full">
+                          <span className="w-1.5 h-1.5 rounded-full bg-white animate-pulse" /> Live
+                        </span>
+                      ) : null}
+                    </div>
+                    <div className="absolute bottom-4 left-4 w-12 h-12 rounded-full bg-ivory text-navy flex items-center justify-center shadow-lg group-hover:scale-110 transition-transform">
+                      {(isLive || hasYT) ? <Play className="w-5 h-5 ml-0.5" /> : (playing === s.title ? <Pause className="w-5 h-5" /> : <Play className="w-5 h-5 ml-0.5" />)}
+                    </div>
+                    {(isLive || hasYT) ? (
+                      <div className="absolute bottom-4 right-4 inline-flex items-center gap-1 text-[10px] tracking-widest uppercase bg-navy/70 text-ivory px-2 py-1 rounded-full backdrop-blur">
+                        <Youtube className="w-3 h-3 text-gold" /> Watch
+                      </div>
+                    ) : (
+                      <div className="absolute bottom-4 right-4"><Waveform playing={playing === s.title} /></div>
+                    )}
+                  </button>
+                  <div className="p-5">
+                    <div className="flex items-start justify-between gap-3">
+                      <h3 className="font-serif text-xl text-navy leading-tight">{s.title}</h3>
+                      <span className="text-xs text-muted-ink whitespace-nowrap mt-1">{s.year}</span>
+                    </div>
+                    <div className="text-xs text-gold mt-1 tracking-wide">{s.role}</div>
+                    <p className="mt-3 text-sm text-navy/70 leading-relaxed">{s.desc}</p>
+                    <div className="mt-4 flex items-center justify-between border-t border-beige-2 pt-3">
+                      <div className="flex items-center gap-3 text-xs text-navy/60">
+                        <span className="inline-flex items-center gap-1"><Globe className="w-3.5 h-3.5" /> {s.language}</span>
+                        <span className="inline-flex items-center gap-1"><Music2 className="w-3.5 h-3.5" /> {s.genre}</span>
+                      </div>
+                      {s.streamUrl ? (
+                        <a href={s.streamUrl} target="_blank" rel="noreferrer" className="text-xs text-navy/70 hover:text-navy inline-flex items-center gap-1 link-sweep">
+                          Stream <ArrowUpRight className="w-3.5 h-3.5" />
+                        </a>
+                      ) : null}
+                    </div>
+                  </div>
+                </motion.article>
+              )
+            })}
+          </div>
+        )}
       </div>
+
+      {/* YouTube iframe modal */}
+      <AnimatePresence>
+        {ytOpen && (
+          <motion.div initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}
+                      className="fixed inset-0 z-[90] bg-navy/95 backdrop-blur-sm flex items-center justify-center p-4 md:p-8"
+                      onClick={() => setYtOpen(null)}>
+            <motion.div initial={{ scale: 0.94, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} exit={{ scale: 0.96, opacity: 0 }}
+                        transition={{ duration: 0.35, ease: [0.16, 1, 0.3, 1] }}
+                        onClick={(e) => e.stopPropagation()}
+                        className="relative w-full max-w-5xl">
+              <div className="flex items-center justify-between mb-3">
+                <div className="text-[10px] tracking-[0.3em] uppercase text-gold flex items-center gap-2">
+                  <Youtube className="w-4 h-4" /> Now Playing
+                </div>
+                <button onClick={() => setYtOpen(null)}
+                        aria-label="Close video"
+                        className="w-10 h-10 rounded-full bg-ivory/10 border border-ivory/25 text-ivory hover:bg-ivory hover:text-navy transition-colors flex items-center justify-center">
+                  <X className="w-5 h-5" />
+                </button>
+              </div>
+              <div className="text-ivory font-serif text-xl md:text-2xl mb-3 truncate">{ytOpen.title}</div>
+              <div className="relative w-full aspect-video rounded-2xl overflow-hidden bg-black shadow-[0_40px_80px_-30px_rgba(0,0,0,0.6)]">
+                <iframe
+                  src={ytOpen.url}
+                  title={ytOpen.title}
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                  className="absolute inset-0 w-full h-full"
+                />
+              </div>
+              {youtubeUrl ? (
+                <div className="mt-4 flex justify-center">
+                  <a href={youtubeUrl} target="_blank" rel="noopener noreferrer"
+                     className="inline-flex items-center gap-2 rounded-full bg-gold text-navy px-5 py-2.5 text-sm font-medium hover:opacity-90">
+                    <Youtube className="w-4 h-4" /> Visit YouTube channel <ArrowUpRight className="w-4 h-4" />
+                  </a>
+                </div>
+              ) : null}
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </section>
   )
 }
@@ -1181,7 +1297,7 @@ function App() {
       <Hero hero={content.site.hero} />
       <Stats stats={content.site.stats || []} />
       <About about={content.site.about} timeline={content.timeline} />
-      <MusicSection songs={content.songs} />
+      <MusicSection songs={content.songs} youtubeUrl={content.site.contact?.youtubeUrl} />
       <Voice projects={content.voiceProjects} />
       <Gallery items={content.gallery} />
       <Collaborations collaborators={content.collaborators} highlights={content.collabHighlights} />

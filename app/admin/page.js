@@ -663,21 +663,21 @@ function Dashboard({ token, logout }) {
             ]}
           />}
           {tab === 'songs' && <CollectionManager
-            title="Music" subtitle="Original songs, playback, tributes, anthems."
+            title="Music" subtitle="Original songs, playback, tributes, anthems, and Live performance videos. For Live entries, paste a YouTube URL — clicking the thumbnail on the site plays the video in an iframe."
             endpoint="songs" token={token}
             emptyItem={{ title: '', role: '', year: new Date().getFullYear(), language: '', genre: '', desc: '', image: '', tag: '', audioUrl: '', videoUrl: '', streamUrl: '' }}
             fields={[
-              { key: 'title', label: 'Song Title' },
+              { key: 'title', label: 'Song / Event Title' },
               { key: 'year', label: 'Year', type: 'number' },
-              { key: 'role', label: 'Role' },
-              { key: 'tag', label: 'Tag / Label' },
+              { key: 'role', label: 'Role (e.g. Original • Singer / Live Concert)' },
+              { key: 'tag', label: 'Tag / Label (e.g. Vermilion Records, Sun Fest 2024)' },
               { key: 'language', label: 'Language' },
-              { key: 'genre', label: 'Genre', type: 'select', options: ['Original', 'Playback', 'Tribute', 'Anthem', 'Film', 'Cover'] },
+              { key: 'genre', label: 'Category', type: 'select', options: ['Original', 'Playback', 'Tribute', 'Anthem', 'Film', 'Live', 'Cover'] },
               { key: 'desc', label: 'Description', type: 'textarea', full: true },
-              { key: 'image', label: 'Cover Image', type: 'media', full: true },
-              { key: 'audioUrl', label: 'Audio URL (mp3)' },
-              { key: 'videoUrl', label: 'Video URL (YouTube)' },
-              { key: 'streamUrl', label: 'Streaming URL (Spotify / Apple)', full: true },
+              { key: 'image', label: 'Cover Image / Video Thumbnail', type: 'media', full: true },
+              { key: 'videoUrl', label: 'YouTube URL (opens in iframe modal on click — required for Live)', full: true },
+              { key: 'audioUrl', label: 'Audio URL (mp3) — optional, for non-Live tracks' },
+              { key: 'streamUrl', label: 'Streaming URL (Spotify / Apple)' },
             ]}
           />}
           {tab === 'voice' && <CollectionManager
