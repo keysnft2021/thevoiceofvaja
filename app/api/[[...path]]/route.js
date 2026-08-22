@@ -58,8 +58,8 @@ const SEED = {
       { label: 'Languages Performed', value: 5, suffix: '' },
     ],
     contact: {
-      phone: '+91 98409 68714',
-      email: 'thevoiceofvaja@gmail.com',
+      phone: '',
+      email: 'bookings@thevoiceofvaja.com',
       instagram: 'thevoiceofvaja',
       instagramUrl: 'https://www.instagram.com/thevoiceofvaja',
       youtubeUrl: '',

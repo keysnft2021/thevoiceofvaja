@@ -413,7 +413,7 @@ function BookingsView({ token }) {
                   </td>
                   <td className="py-3 pr-4">
                     <div className="text-navy">{b.eventType}</div>
-                    <div className="text-xs text-navy/50">{b.location} · Budget: {b.budget || '—'}</div>
+                    <div className="text-xs text-navy/50">{b.location}</div>
                     {b.message ? <div className="text-xs text-navy/60 mt-1 max-w-sm">{b.message}</div> : null}
                   </td>
                   <td className="py-3 pr-4 text-navy/70">{b.date || '—'}</td>

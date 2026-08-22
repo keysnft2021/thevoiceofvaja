@@ -14,7 +14,6 @@ const NAV_LINKS = [
   { id: 'about', label: 'About' },
   { id: 'music', label: 'Music' },
   { id: 'voice', label: 'Voice & Dubbing' },
-  { id: 'gallery', label: 'Gallery' },
   { id: 'collabs', label: 'Collaborations' },
   { id: 'testimonials', label: 'Testimonials' },
   { id: 'book', label: 'Book Vaja' },
@@ -84,7 +83,7 @@ function Waveform({ playing }) {
 function WelcomeScreen({ onEnter, welcome }) {
   return (
     <motion.div initial={{ opacity: 1 }} exit={{ opacity: 0, transition: { duration: 0.9, ease: [0.16, 1, 0.3, 1] } }}
-      className="fixed inset-0 z-[100] overflow-hidden bg-navy">
+      className="fixed inset-0 z-[100] overflow-y-auto overflow-x-hidden bg-navy">
       <div className="absolute inset-0">
         <img src={welcome.bgImage} alt="" className="w-full h-full object-cover opacity-40" />
         <div className="absolute inset-0 bg-gradient-to-b from-navy/40 via-navy/60 to-navy" />
@@ -92,7 +91,7 @@ function WelcomeScreen({ onEnter, welcome }) {
       <motion.div initial={{ scale: 0.6, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 1.8, ease: 'easeOut' }}
         className="absolute -top-40 left-1/2 -translate-x-1/2 w-[70vw] h-[70vw] max-w-[900px] max-h-[900px] rounded-full"
         style={{ background: 'radial-gradient(circle, rgba(228,206,138,0.35), transparent 60%)' }} />
-      <div className="relative z-10 h-full flex flex-col">
+      <div className="relative z-10 min-h-full flex flex-col">
         <motion.div initial={{ opacity: 0, y: -12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: 0.4 }} className="pt-6 md:pt-8 text-center">
           <span className="inline-flex items-center gap-2 text-[10px] md:text-xs tracking-[0.3em] text-gold uppercase text-center">
             <span className="h-px w-6 md:w-8 bg-gold" /> Every soul has a voice. Every voice has a soul. <span className="h-px w-6 md:w-8 bg-gold" />
@@ -178,7 +177,6 @@ function Nav({ scrolled, onReturnToWelcome }) {
               <span className="w-8 h-8 rounded-full bg-navy text-gold flex items-center justify-center font-serif text-lg transition-transform group-hover:scale-105">V</span>
               <span className="hidden sm:flex flex-col leading-none">
                 <span className="font-serif text-navy text-sm tracking-wide group-hover:text-gold transition-colors">The Voice Of Vaja</span>
-                <span className="text-[9px] tracking-[0.3em] text-muted-ink uppercase mt-0.5">Since 2007</span>
               </span>
             </a>
             <nav className="hidden lg:flex items-center gap-6">
@@ -246,39 +244,50 @@ function Hero({ hero }) {
         <div className="lg:col-span-6 relative">
           <div className="relative aspect-[4/5] max-w-[460px] mx-auto">
             <div className="absolute -inset-6 rounded-[2rem] bg-gradient-to-br from-gold/20 via-beige to-transparent blur-2xl" />
+
             <div className="relative rounded-[2rem] overflow-hidden border border-beige-2 shadow-[0_50px_100px_-30px_rgba(14,27,51,0.35)] h-full">
-              <img src={hero.image} alt="Vaja" className="w-full h-full object-cover" referrerPolicy="no-referrer" />
+
+              <img
+                src={hero.image}
+                alt="Vaja"
+                className="w-full h-full object-cover"
+                referrerPolicy="no-referrer"
+              />
+
               <div className="absolute inset-0 bg-gradient-to-t from-navy/40 via-transparent to-transparent" />
-              <motion.div animate={{ y: [0, -12, 0] }} transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
-                className="absolute -left-4 md:-left-8 bottom-14 bg-ivory rounded-2xl border border-beige-2 shadow-xl p-3 pr-5 flex items-center gap-3">
-                <div className="w-10 h-10 rounded-xl bg-navy text-gold flex items-center justify-center"><Music className="w-5 h-5" /></div>
-                <div>
-                  <div className="text-[10px] tracking-widest uppercase text-muted-ink">Now Playing</div>
-                  <div className="font-serif text-navy text-sm">{hero.floatingLabel}</div>
-                </div>
-              </motion.div>
-              <motion.div animate={{ y: [0, 12, 0] }} transition={{ duration: 7, repeat: Infinity, ease: 'easeInOut' }}
-                className="absolute -right-3 md:-right-6 top-10 bg-ivory rounded-2xl border border-beige-2 shadow-xl px-4 py-3">
+
+              <motion.div
+                animate={{ y: [0, -12, 0] }}
+                transition={{ duration: 6, repeat: Infinity, ease: 'easeInOut' }}
+                className="absolute left-4 md:left-6 bottom-12 z-20 bg-ivory rounded-2xl border border-beige-2 shadow-xl px-5 py-3 min-w-[230px]"
+              >
                 <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-gold animate-pulse" />
-                  <div className="text-[10px] tracking-widest uppercase text-muted-ink">Live Booking</div>
+                  <span className="w-2 h-2 rounded-full bg-gold animate-pulse shrink-0" />
+
+                  <div className="text-[10px] tracking-widest uppercase text-muted-ink whitespace-nowrap">
+                    Live Booking
+                  </div>
                 </div>
-                <div className="font-serif text-navy text-sm mt-1">{hero.floatingRight}</div>
+
+                <div className="font-serif text-navy text-sm mt-1 whitespace-nowrap">
+                  {hero.floatingRight}
+                </div>
               </motion.div>
+
             </div>
           </div>
+
         </div>
+
       </div>
-      <div className="mt-8 border-y border-beige-2 bg-beige/50 overflow-hidden">
-        <div className="flex marquee-track py-3">
-          {[...Array(2)].map((_, k) => (
-            <div key={k} className="flex items-center gap-14 pr-14 text-navy/70 font-serif text-lg italic whitespace-nowrap">
-              {['Tamil','English','Hindi','Telugu','Malayalam','Originals','Playback','Live','Voice-Overs','Dubbing','Tamil','English','Hindi','Telugu','Malayalam','Originals','Playback','Live'].map((t, i) => (
-                <span key={i} className="flex items-center gap-14"><span>{t}</span><Sparkles className="w-4 h-4 text-gold" /></span>
-              ))}
-            </div>
-          ))}
-        </div>
+
+      <div className="mt-12 h-[5px] md:h-[6px] overflow-hidden bg-[#0E1B33]">
+        <div
+          className="h-full w-full"
+          style={{
+            background: 'linear-gradient(90deg, #0E1B33 0%, #B8952F 20%, #E4CE8A 50%, #B8952F 80%, #0E1B33 100%)'
+          }}
+        />
       </div>
     </section>
   )
@@ -324,15 +333,15 @@ function About({ about, timeline }) {
         </div>
         <div className="lg:col-span-7 relative">
           <div className="absolute left-6 md:left-8 top-0 bottom-0 w-px bg-gradient-to-b from-gold/60 via-beige-2 to-transparent" />
-          <div className="space-y-8">
+          <div className="space-y-5">
             {timeline.map((t) => (
               <div key={t.id} className="reveal relative pl-14 md:pl-20">
                 <div className="absolute left-2 md:left-4 top-1 w-9 h-9 rounded-full bg-ivory border border-gold/50 flex items-center justify-center shadow-sm">
                   <span className="w-2.5 h-2.5 rounded-full bg-gold" />
                 </div>
                 <div className="text-xs tracking-[0.3em] uppercase text-gold mb-2">{t.year}</div>
-                <h3 className="font-serif text-xl md:text-2xl text-navy">{t.title}</h3>
-                <p className="mt-2 text-navy/70 leading-relaxed max-w-xl">{t.desc}</p>
+                <h3 className="font-serif text-lg md:text-xl text-navy">{t.title}</h3>
+                <p className="mt-1.5 text-sm md:text-base text-navy/70 leading-relaxed max-w-xl">{t.desc}</p>
               </div>
             ))}
           </div>
@@ -559,7 +568,7 @@ function Voice({ projects }) {
         <div className="flex flex-col md:flex-row md:items-end md:justify-between gap-6 mb-12 reveal">
           <div>
             <div className="text-xs tracking-[0.35em] uppercase text-gold mb-3">Voice & Dubbing</div>
-            <h2 className="font-serif text-4xl md:text-5xl">A voice that can carry a <span className="italic text-gold-grad">brand</span>, a <span className="italic text-gold-grad">character</span>, or a <span className="italic text-gold-grad">nation</span>.</h2>
+            <h2 className="font-serif text-4xl md:text-5xl">A voice that can carry a <span className="italic text-gold-grad">brand</span>, a <span className="italic text-gold-grad">character</span> or a <span className="italic text-gold-grad">nation</span>.</h2>
           </div>
           <p className="max-w-md text-beige/70">From cinematic character voices to multilingual TVCs, Vaja delivers with a warmth and speed that production houses rely on. Studios: Chennai + remote-ready worldwide.</p>
         </div>
@@ -776,7 +785,7 @@ function Gallery({ items }) {
                   <div className="inline-flex items-center gap-2 text-[10px] tracking-[0.3em] uppercase text-gold">
                     <span className="h-px w-6 bg-gold" /> {current.tag || 'Gallery'}
                   </div>
-                  <div className="mt-1 font-serif text-xl md:text-2xl text-navy truncate">
+                  <div className="mt-1 font-serif text-lg md:text-xl text-navy truncate">
                     {current.caption || current.tag || 'Untitled'}
                   </div>
                 </motion.div>
@@ -909,7 +918,7 @@ function Testimonials({ items }) {
 
 // ------------- BOOK -------------
 function Book({ contact }) {
-  const [form, setForm] = useState({ name: '', company: '', email: '', phone: '', eventType: '', date: '', location: '', budget: '', message: '' })
+  const [form, setForm] = useState({ name: '', company: '', email: '', phone: '', eventType: '', date: '', location: '', message: '' })
   const [loading, setLoading] = useState(false)
   const [done, setDone] = useState(false)
   const set = (k, v) => setForm((f) => ({ ...f, [k]: v }))
@@ -937,7 +946,6 @@ function Book({ contact }) {
           <h2 className="font-serif text-4xl md:text-5xl leading-tight">Let’s create something <span className="italic text-gold-grad">unforgettable</span>.</h2>
           <p className="mt-5 text-beige/70 max-w-md">Live concerts, corporate events, weddings, cultural programs, college fests, music festivals, playback singing, voice-overs and dubbing engagements. Share your brief — we’ll respond within 24 hours.</p>
           <div className="mt-8 space-y-3 text-sm">
-            <div className="flex items-center gap-3"><Phone className="w-4 h-4 text-gold" /> {contact.phone}</div>
             <div className="flex items-center gap-3"><Mail className="w-4 h-4 text-gold" /> {contact.email}</div>
             <div className="flex items-center gap-3"><Instagram className="w-4 h-4 text-gold" /> @{contact.instagram}</div>
             <div className="flex items-center gap-3"><MapPin className="w-4 h-4 text-gold" /> {contact.location}</div>
@@ -960,7 +968,6 @@ function Book({ contact }) {
                 </div>
                 <Field label="Preferred Date" type="date" value={form.date} onChange={(v) => set('date', v)} />
                 <Field label="Location" value={form.location} onChange={(v) => set('location', v)} />
-                <Field label="Budget (approx.)" value={form.budget} onChange={(v) => set('budget', v)} />
               </div>
               <div>
                 <label className="text-[10px] tracking-widest uppercase text-beige/60">Message</label>
@@ -975,7 +982,7 @@ function Book({ contact }) {
               <div className="w-14 h-14 rounded-full bg-gold text-navy mx-auto flex items-center justify-center"><Sparkles className="w-6 h-6" /></div>
               <h3 className="font-serif text-3xl mt-4">Request received.</h3>
               <p className="mt-3 text-beige/80 max-w-md mx-auto">Thank you — Vaja’s team will get back to you within 24 hours at the email you provided.</p>
-              <button onClick={() => { setDone(false); setForm({ name:'', company:'', email:'', phone:'', eventType:'', date:'', location:'', budget:'', message:'' }) }} className="mt-6 text-xs tracking-widest uppercase text-gold hover:text-[color:var(--gold-soft)]">Send another request →</button>
+              <button onClick={() => { setDone(false); setForm({ name:'', company:'', email:'', phone:'', eventType:'', date:'', location:'', message:'' }) }} className="mt-6 text-xs tracking-widest uppercase text-gold hover:text-[color:var(--gold-soft)]">Send another request →</button>
             </motion.div>
           )}
         </div>
@@ -1018,7 +1025,6 @@ function Contact({ contact }) {
           <h2 className="font-serif text-4xl md:text-5xl text-navy leading-tight">Say hello, share a brief, or just <span className="italic text-gold-grad">say hi</span>.</h2>
           <p className="mt-5 text-navy/70 max-w-md">Whether you’re a fan, a director, a brand, or a curator — we’d love to hear from you.</p>
           <div className="mt-8 space-y-4">
-            <ContactRow icon={Phone} label="Phone" value={contact.phone} href={`tel:${(contact.phone||'').replace(/\s/g,'')}`} />
             <ContactRow icon={Mail} label="Email" value={contact.email} href={`mailto:${contact.email}`} />
             <ContactRow icon={Instagram} label="Instagram" value={'@' + contact.instagram} href={contact.instagramUrl} />
             <ContactRow icon={MapPin} label="Based in" value={contact.location} />
@@ -1073,7 +1079,7 @@ function Footer({ contact }) {
         <div className="mx-auto max-w-7xl px-6 py-10 grid md:grid-cols-2 gap-6 items-center">
           <div>
             <div className="text-xs tracking-[0.35em] uppercase text-gold mb-2">Ready to book?</div>
-            <h3 className="font-serif text-3xl md:text-4xl text-white leading-tight">Bring the voice of Vaja to your <span className="italic text-gold-grad">next stage</span>.</h3>
+            <h3 className="font-serif text-3xl md:text-4xl text-white leading-tight">Bring Vaja to your <span className="italic text-gold-grad">next stage</span>.</h3>
           </div>
           <div className="flex md:justify-end gap-3 flex-wrap">
             <a href="#book" className="inline-flex items-center gap-2 rounded-full bg-gold text-navy px-6 py-3 text-sm font-medium hover:opacity-90"><Sparkles className="w-4 h-4" /> Book Vaja</a>
@@ -1107,8 +1113,6 @@ function Footer({ contact }) {
                className="w-10 h-10 rounded-full border border-white/15 flex items-center justify-center hover:border-gold hover:text-gold text-white/70"><Youtube className="w-4 h-4" /></a> : null}
             {contact.spotifyUrl ? <a href={contact.spotifyUrl} target="_blank" rel="noreferrer" aria-label="Spotify"
                className="w-10 h-10 rounded-full border border-white/15 flex items-center justify-center hover:border-gold hover:text-gold text-white/70"><Music2 className="w-4 h-4" /></a> : null}
-            <a href={`tel:${(contact.phone||'').replace(/\s/g,'')}`} aria-label="Phone"
-               className="w-10 h-10 rounded-full border border-white/15 flex items-center justify-center hover:border-gold hover:text-gold text-white/70"><Phone className="w-4 h-4" /></a>
           </div>
         </div>
 
@@ -1119,7 +1123,6 @@ function Footer({ contact }) {
             <li><a href="#about" className="hover:text-white link-sweep">About</a></li>
             <li><a href="#music" className="hover:text-white link-sweep">Music</a></li>
             <li><a href="#voice" className="hover:text-white link-sweep">Voice & Dubbing</a></li>
-            <li><a href="#gallery" className="hover:text-white link-sweep">Gallery</a></li>
             <li><a href="#collabs" className="hover:text-white link-sweep">Collaborations</a></li>
           </ul>
         </div>
@@ -1131,14 +1134,12 @@ function Footer({ contact }) {
             <li><a href="#book" className="hover:text-white link-sweep">Book Vaja</a></li>
             <li><a href="#contact" className="hover:text-white link-sweep">Contact</a></li>
             <li><a href="/sitemap.xml" className="hover:text-white link-sweep">Sitemap.xml</a></li>
-            <li><a href="/admin" className="hover:text-white link-sweep">Admin</a></li>
           </ul>
         </div>
 
         <div className="md:col-span-3">
           <div className="text-xs tracking-[0.3em] uppercase text-gold mb-4">Reach Out</div>
           <ul className="space-y-3 text-sm text-white/85">
-            <li className="flex items-start gap-3"><Phone className="w-4 h-4 mt-0.5 text-gold shrink-0" /><a href={`tel:${(contact.phone||'').replace(/\s/g,'')}`} className="hover:text-white">{contact.phone}</a></li>
             <li className="flex items-start gap-3"><Mail className="w-4 h-4 mt-0.5 text-gold shrink-0" /><a href={`mailto:${contact.email}`} className="hover:text-white break-all">{contact.email}</a></li>
             <li className="flex items-start gap-3"><Instagram className="w-4 h-4 mt-0.5 text-gold shrink-0" /><a href={contact.instagramUrl} target="_blank" rel="noreferrer" className="hover:text-white">@{contact.instagram}</a></li>
             <li className="flex items-start gap-3"><MapPin className="w-4 h-4 mt-0.5 text-gold shrink-0" /><span>{contact.location}</span></li>
@@ -1154,7 +1155,17 @@ function Footer({ contact }) {
             <span className="opacity-30">·</span>
             <a href="/robots.txt" className="hover:text-white">Robots</a>
             <span className="opacity-30">·</span>
-            <span>Crafted with care in Chennai</span>
+            <span>
+              Crafted with care by{' '}
+              <a
+                href="https://quantemlabs.com/"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="hover:text-gold transition-colors"
+              >
+                Quantemlabs
+              </a>
+            </span>
           </div>
         </div>
       </div>
